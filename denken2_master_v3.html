@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>電験二種 計算対策</title>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2230;
+  --border:#263050;--accent:#4e9eff;--accent2:#7ec8c8;
+  --accent3:#f0c040;--success:#4ecb71;
+  --text:#cdd5e0;--text2:#8892a8;--text3:#4d5870;
+  --formula:#98d898;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',system-ui,sans-serif;font-size:14px;line-height:1.75}
+#app{display:flex;flex-direction:column;height:100vh}
+#top-nav{flex-shrink:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px}
+#nav-back{display:none;background:none;border:none;color:var(--accent);font-size:22px;cursor:pointer;padding:4px 8px 4px 0;line-height:1}
+#nav-title{flex:1;font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#nav-prog{font-size:11px;font-family:monospace;color:var(--accent2);white-space:nowrap}
+#content{flex:1;overflow:hidden;position:relative}
+.scr{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:16px;padding-bottom:80px}
+.scr.on{display:block}
+#scr-detail{padding:0}
+#bot-bar{flex-shrink:0;height:60px;background:var(--bg2);border-top:1px solid var(--border);display:flex}
+.btab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;font-size:10px;color:var(--text3);transition:color .15s}
+.btab .ico{font-size:20px;line-height:1}
+.btab.on{color:var(--accent)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat-box .n{font-family:monospace;font-size:26px;font-weight:600;color:var(--accent);line-height:1.2}
+.stat-box .l{font-size:11px;color:var(--text3);margin-top:3px}
+.prog-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px}
+.pbar-bg{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:8px}
+.pbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+.sec-lbl{font-size:11px;font-weight:500;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.t-row{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .15s}
+.t-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.t-row:active{border-color:var(--accent)}
+.t-info{flex:1;min-width:0;padding-left:4px}
+.t-name{font-size:15px;font-weight:500;line-height:1.4;margin-bottom:4px;color:var(--text)}
+.t-meta{font-size:12px;color:var(--text3)}
+.m-pill{font-size:11px;padding:4px 10px;border-radius:12px;white-space:nowrap;flex-shrink:0}
+.chv{color:var(--text3);font-size:18px;flex-shrink:0}
+.chips{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.chip{padding:7px 14px;border-radius:20px;font-size:12px;white-space:nowrap;flex-shrink:0;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text3);transition:all .15s}
+.chip.on{border-color:var(--accent);color:var(--accent);background:rgba(78,158,255,.1)}
+/* detail */
+#detail-head{flex-shrink:0;background:var(--bg2)}
+#detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+#scr-detail{display:none;flex-direction:column}
+#scr-detail.on{display:flex}
+.m-btns{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.m-btn{flex:1;padding:9px 4px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text3);transition:all .15s}
+.dtabs{display:flex;border-bottom:1px solid var(--border)}
+.dtab{flex:1;padding:12px 6px;font-size:14px;text-align:center;cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;color:var(--text3);transition:all .15s}
+.dtab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.e-head{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--accent2);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.e-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.e-sec{margin-bottom:22px}
+.f-lbl{font-size:11px;color:var(--text3);margin:10px 0 4px}
+.f-box{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--formula);border-radius:6px;padding:12px 14px;font-family:monospace;font-size:13px;color:var(--formula);line-height:1.9;overflow-x:auto;white-space:pre}
+.note-box{background:rgba(78,158,255,.07);border:1px solid rgba(78,158,255,.22);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.75;margin:10px 0}
+.warn-box{background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.28);border-radius:8px;padding:12px 14px;font-size:13px;color:#c8a840;line-height:1.75;margin:10px 0}
+.warn-box::before{content:'⚠ '}
+.step{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.step-h{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--bg2);user-select:none}
+.step-h:active{background:var(--bg3)}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:monospace}
+.step-lbl{flex:1;font-size:14px;color:var(--text);line-height:1.4}
+.step-arr{color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0}
+.step.op .step-arr{transform:rotate(180deg)}
+.step-body{display:none;padding:12px 14px 12px 48px;background:var(--bg);border-top:1px solid var(--border);font-size:13px;line-height:1.85;color:var(--text2)}
+.step.op .step-body{display:block}
+.sfml{font-family:monospace;font-size:13px;color:var(--formula);background:var(--bg3);padding:8px 12px;border-radius:6px;margin:8px 0;overflow-x:auto;white-space:pre;display:block}
+.qcard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.qnum{font-size:11px;color:var(--text3);font-family:monospace;margin-bottom:8px}
+.qq{font-size:14px;line-height:1.85;margin-bottom:12px}
+.qgiven{background:var(--bg3);border-radius:6px;padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:14px;font-family:monospace;line-height:1.9;overflow-x:auto;white-space:pre}
+.ans-btn{width:100%;padding:11px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-size:14px;cursor:pointer;margin-bottom:12px}
+.ans-blk{display:none;border-top:1px solid var(--border);padding-top:14px}
+.ans-blk.op{display:block}
+.ans-lbl{font-size:11px;color:var(--success);font-weight:500;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.exam-box{background:rgba(78,203,113,.05);border:1px solid rgba(78,203,113,.2);border-radius:8px;padding:12px 14px;margin-top:12px}
+.exam-lbl{font-size:11px;color:var(--success);font-weight:500;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.exam-fml{font-family:monospace;font-size:12px;color:var(--text2);line-height:1.9;white-space:pre-wrap}
+.ans-cmt{font-size:13px;color:var(--text2);line-height:1.8;margin-top:12px}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top-nav">
+    <button id="nav-back" onclick="goBack()">‹</button>
+    <div id="nav-title">電験二種 計算対策</div>
+    <div id="nav-prog"></div>
+  </div>
+  <div id="content">
+    <div id="scr-home" class="scr on"></div>
+    <div id="scr-list" class="scr"></div>
+    <div id="scr-detail" class="scr">
+      <div id="detail-head">
+        <div class="m-btns" id="m-btns"></div>
+        <div class="dtabs">
+          <button class="dtab on" id="dt-exp" onclick="switchDTab('exp')">解説</button>
+          <button class="dtab" id="dt-quiz" onclick="switchDTab('quiz')">演習問題</button>
+        </div>
+      </div>
+      <div id="detail-body">
+        <div id="dc-exp"></div>
+        <div id="dc-quiz" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+  <div id="bot-bar">
+    <button class="btab on" id="bt-home" onclick="showScr('home')"><span class="ico">⌂</span><span>ホーム</span></button>
+    <button class="btab" id="bt-list" onclick="showScr('list')"><span class="ico">☰</span><span>テーマ一覧</span></button>
+  </div>
+</div>
+<script>
+
+// ============================================================
+// THEME DATA - 全テーマ・全問題
+// ============================================================
+const TOPICS = [
+// ─── 電力系統 ────────────────────────────────────────────────
+{id:"p01",cat:"ps",freq:3,name:"%インピーダンスと短絡電流",
+exp:{
+intro:"%インピーダンス（%Z）は定格電流を流したときの電圧降下が定格電圧の何%かを示す無名数です。Ω値は電圧レベルごとに変わりますが%Zは変わらないため、変圧器を挟んだ複数機器の合成を単純加算で処理できます。",
+fmls:[
+{l:"基本定義",f:"%Z = (Z × In / Vn) × 100  [%]"},
+{l:"短絡電流",f:"Is = In × (100 / %Z)  [A]"},
+{l:"基準容量換算",f:"%Z' = %Z × (Pbase / Pn)  [%]"},
+{l:"三相短絡容量",f:"Ps = Pbase × (100 / %Z)  [VA]"},
+],
+notes:[
+{t:"n",s:"Is=In×(100/%Z)は「%Zが小さいほど短絡電流が大きい」という意味。%Z=5%なら定格電流の20倍が流れます。"},
+{t:"w",s:"複数機器の%Zを足す前に必ず基準容量を揃えてください。揃えないまま加算すると全て誤りになります。"},
+],
+steps:[
+{l:"%Zの意味を確認する",b:"Z×Inが電圧降下[V]、Vnが定格電圧[V]。分子÷分母=電圧降下の割合×100が%Zです。",f:""},
+{l:"短絡電流の導出",b:"%Z/100=Z×In/Vn → Vn/Z=In×(100/%Z)\n左辺は短絡電流Isです。",f:"Is = In × 100 / %Z"},
+{l:"複数機器の合成",b:"同一基準容量に換算してから加算します。",f:"%Z' = %Z × (Pbase/Pn)\n%Ztotal = Σ%Z'"},
+],
+},
+qs:[
+{q:"定格容量10MVA、定格電圧6.6kV（線間）、%Z=5%の変圧器の二次側で三相短絡が発生。短絡電流を求めよ。",
+g:"Pn=10MVA  Vn=6.6kV(線間)  %Z=5%",
+ss:[
+{l:"定格電流",f:"In=Pn/(√3×Vn)=10×10⁶/(1.732×6600)≒875A"},
+{l:"短絡電流",f:"Is=In×(100/%Z)=875×20=17500A=17.5kA"},
+],r:"Is=17.5kA",e:"In≒875A\nIs=875×20=17.5kA",c:"%Z=5%は定格電流の20倍が流れることを意味します。遮断器の遮断容量はこの値以上が必要です。"},
+{q:"基準容量100MVAの系統に%Z=4%の変圧器A（100MVA基準）と%Z=6%の変圧器B（定格50MVA）が直列接続。合成%Zと短絡容量を求めよ。",
+g:"Pbase=100MVA  %Za=4%  Pnb=50MVA  %Zb=6%",
+ss:[
+{l:"BのPbase換算",f:"%Zb'=6×(100/50)=12%"},
+{l:"合成%Z",f:"%Ztotal=4+12=16%"},
+{l:"短絡容量",f:"Ps=100M×(100/16)=625MVA"},
+],r:"合成%Z=16%、Ps=625MVA",e:"%Zb'=12%\n%Ztotal=16%\nPs=625MVA",c:"換算忘れで4+6=10%とすると短絡容量が1000MVAになり大きく誤ります。"},
+{q:"%Z=8%の系統（基準200MVA）に%Z=10%・定格100MVAの発電機を並列接続。合成%Zを求めよ。",
+g:"%Za=8%(200MVA基準)  %Zg=10%(定格100MVA)",
+ss:[
+{l:"発電機を200MVA基準換算",f:"%Zg'=10×(200/100)=20%"},
+{l:"並列合成",f:"%Ztotal=8×20/(8+20)=160/28≒5.71%"},
+],r:"合成%Z≒5.71%",e:"%Zg'=20%\n%Ztotal=8×20/28≒5.71%",c:"並列接続の%Zは積/和で求めます。発電機追加で短絡容量が増大します。"},
+{q:"定格電圧6.6kV（線間）、%Z=6%、定格容量5MVAの変圧器の実インピーダンスZを求めよ。",
+g:"Vn=6.6kV  %Z=6%  Pn=5MVA",
+ss:[
+{l:"定格電流",f:"In=5M/(√3×6600)≒437.4A"},
+{l:"実インピーダンス",f:"Z=%Z×Vn(相)/(100×In)\n=6×3810/(100×437.4)≒0.523Ω"},
+],r:"Z≒0.523Ω",e:"In≒437.4A\nZ=6×3810/(100×437.4)≒0.523Ω",c:"実インピーダンスは電圧レベルに依存します。%Zはそれを統一する共通指標です。"},
+{q:"%Z=5%の変圧器（基準100MVA）に接続する遮断器の遮断容量が2000MVAのとき、対応できる最小の合成%Zを求めよ。",
+g:"Pb=2000MVA  Pbase=100MVA",
+ss:[
+{l:"逆算",f:"Pb=Pbase×(100/%Zmin)\n2000=100×(100/%Zmin)\n%Zmin=5%"},
+],r:"最小%Z=5%（現状はちょうど限界）",e:"%Zmin=Pbase×100/Pb=100×100/2000=5%",c:"系統が強くなる（%Z低下）と短絡容量が増大し既設遮断器が対応できなくなることがあります。"},
+]},
+
+{id:"p02",cat:"ps",freq:3,name:"送電線の電圧降下と電力損失",
+exp:{
+intro:"送電線は抵抗RとリアクタンスXを持ちます。負荷電流が流れると電圧降下と電力損失が発生します。近似式を使いこなすことが試験のポイントです。",
+fmls:[
+{l:"電圧降下（近似式）",f:"ΔV = (P×R + Q×X) / Vs  [V]"},
+{l:"受電端電圧",f:"Vr = Vs − ΔV  [V]"},
+{l:"電力損失（電流形）",f:"Ploss = 3×I²×R  [W]（三相）"},
+{l:"電力損失（P・Q形）",f:"Ploss = (P²+Q²)×R / Vs²  [W]"},
+],
+notes:[
+{t:"n",s:"「PはRに効く、QはXに効く」と覚えてください。Q=0（力率1）にするとΔV=PR/Vsに減ります。"},
+{t:"w",s:"電力損失はI²Rです。電流が2倍になると損失は4倍になります。"},
+],
+steps:[
+{l:"与えられた量を整理する",b:"Vs、R、X、P、Qを確認。QがなければQ=P×tanθで求めます。",f:"Q=P×tanθ=P×sinθ/cosθ"},
+{l:"電圧降下を計算する",b:"ΔV=(PR+QX)/Vsに代入します。",f:"ΔV=(P×R+Q×X)/Vs"},
+{l:"受電端電圧と損失",b:"Vr=Vs−ΔV\n損失はPloss=3I²Rまたは(P²+Q²)R/Vs²です。",f:""},
+],
+},
+qs:[
+{q:"三相3線式送電線でVs=66kV、R=5Ω/相、X=10Ω/相、P=20MW、Q=15Mvarのとき、電圧降下と受電端電圧を求めよ。",
+g:"Vs=66kV  R=5Ω/相  X=10Ω/相  P=20MW  Q=15Mvar",
+ss:[
+{l:"電圧降下",f:"ΔV=(20M×5+15M×10)/66k\n=(100M+150M)/66k=250M/66k≒3788V≒3.79kV"},
+{l:"受電端電圧",f:"Vr=66−3.79≒62.2kV"},
+],r:"ΔV≒3.79kV、Vr≒62.2kV",e:"ΔV=(PR+QX)/Vs=250M/66k≒3788V\nVr≒62.2kV",c:"分子[W×Ω]、分母[V]なので結果は[V]になります。単位の整合を確認してください。"},
+{q:"Vs=66kV、P=30MW、cosθ=0.8（遅れ）、R=4Ω/相、X=8Ω/相のとき電圧降下と電力損失を求めよ。",
+g:"Vs=66kV  P=30MW  cosθ=0.8  R=4Ω  X=8Ω",
+ss:[
+{l:"Qを求める",f:"sinθ=0.6（3:4:5）  tanθ=0.75\nQ=30M×0.75=22.5Mvar"},
+{l:"電圧降下",f:"ΔV=(30M×4+22.5M×8)/66k\n=300M/66k≒4545V≒4.55kV"},
+{l:"電力損失",f:"Ploss=(P²+Q²)×R/Vs²\n=(900M²+506M²)×4/4356M≒1291kW"},
+],r:"ΔV≒4.55kV、Ploss≒1.29MW",e:"Q=P tanθ=22.5Mvar\nΔV≒4.55kV\nPloss≒1.29MW",c:"cosθ=0.8のときsinθ=0.6は3:4:5の比から瞬時に出せます。"},
+{q:"前問の系統で力率を0.95に改善した場合の損失を求め、改善前後の損失比を確認せよ。",
+g:"P=30MW  cosθ₁=0.8→cosθ₂=0.95  R=4Ω  Vs=66kV",
+ss:[
+{l:"改善後のQ",f:"sinθ₂=√(1-0.9025)≒0.312\nQ₂=30M×(0.312/0.95)≒9.85Mvar"},
+{l:"改善後の損失",f:"Ploss₂=(30M²+9.85M²)×4/4356M≒916kW"},
+{l:"損失比",f:"Ploss₂/Ploss₁≒0.71\n≒(cosθ₁/cosθ₂)²=(0.8/0.95)²≒0.71 ✓"},
+],r:"Ploss₂≒916kW（改善前の約71%）",e:"Q₂≒9.85Mvar\nPloss₂≒916kW\n比=(0.8/0.95)²≒0.71",c:"損失の比は(cosθ₁/cosθ₂)²で確認できます。"},
+{q:"Vs=154kV、Vr=150kV、R=10Ω/相、X=20Ω/相のとき、P・Qの関係式を求めよ。",
+g:"Vs=154kV  Vr=150kV  R=10Ω  X=20Ω",
+ss:[
+{l:"ΔVを求める",f:"ΔV=154-150=4kV=4000V"},
+{l:"近似式に代入",f:"(P×10+Q×20)/154000=4000\n10P+20Q=616×10⁶\n∴ P+2Q=6.16×10⁷"},
+],r:"P+2Q=6.16×10⁷（P[W]、Q[var]）",e:"ΔV=4kV\n10P+20Q=4000×154000\nP+2Q=6.16×10⁷",c:"電圧差がわかっていてP・Qの関係を逆算するパターンです。"},
+]},
+
+{id:"p03",cat:"ps",freq:3,name:"力率改善と必要コンデンサ容量",
+exp:{
+intro:"力率が低いと同じ有効電力を送るために余分な電流が流れます。コンデンサで無効電力を補償すると電流削減・電圧改善・設備容量改善の三つが得られます。",
+fmls:[
+{l:"必要コンデンサ容量",f:"Qc = P × (tanθ₁ − tanθ₂)  [var]"},
+{l:"電流の変化",f:"I₂ = I₁ × cosθ₁/cosθ₂"},
+{l:"電力損失の変化比",f:"Ploss₂/Ploss₁ = (cosθ₁/cosθ₂)²"},
+],
+notes:[
+{t:"n",s:"cosθ=0.6のときsinθ=0.8、tanθ=4/3は「3:4:5」から瞬時に出せます。"},
+{t:"w",s:"コンデンサは無効電力だけを供給します。力率改善しても有効電力Pは変わりません。"},
+],
+steps:[
+{l:"tanθを求める",b:"sinθ=√(1-cos²θ)、tanθ=sinθ/cosθで算出します。",f:"tanθ=√(1-cos²θ)/cosθ"},
+{l:"コンデンサ容量を計算する",b:"Qc=P×(tanθ₁-tanθ₂)に代入します。θ₁が改善前、θ₂が改善後です。",f:"Qc=P×(tanθ₁-tanθ₂)"},
+{l:"改善効果を確認する",b:"電流比・損失比・容量比を確認します。",f:"I₂/I₁=cosθ₁/cosθ₂\nPloss₂/Ploss₁=(cosθ₁/cosθ₂)²"},
+],
+},
+qs:[
+{q:"P=500kW、cosθ₁=0.6（遅れ）の負荷を cosθ₂=0.9 に改善するコンデンサ容量と改善後の電流比を求めよ。",
+g:"P=500kW  cosθ₁=0.6  cosθ₂=0.9",
+ss:[
+{l:"tanθ₁",f:"sinθ₁=0.8（3:4:5）  tanθ₁=4/3≒1.333"},
+{l:"tanθ₂",f:"sinθ₂=√0.19≒0.436  tanθ₂≒0.484"},
+{l:"Qc",f:"Qc=500×(1.333-0.484)≒425kvar"},
+{l:"電流比",f:"I₂/I₁=0.6/0.9=2/3≒0.667"},
+],r:"Qc≒425kvar、電流は約2/3",e:"tanθ₁=4/3  tanθ₂≒0.484\nQc=500×0.849≒425kvar\nI₂/I₁=2/3",c:"cosθ=0.6→sinθ=0.8は3:4:5の比からすぐ出せます。"},
+{q:"P=800kW、cosθ=0.7（遅れ）の負荷を力率1.0に改善するためのコンデンサ容量と損失削減率を求めよ。",
+g:"P=800kW  cosθ₁=0.7  cosθ₂=1.0",
+ss:[
+{l:"tanθ₁",f:"sinθ₁=√0.51≒0.714  tanθ₁≒1.020"},
+{l:"Qc",f:"Qc=P×tanθ₁=800×1.020≒816kvar（tanθ₂=0）"},
+{l:"損失比",f:"(0.7/1.0)²=0.49"},
+],r:"Qc≒816kvar、損失は49%に削減",e:"Qc=800×0.714/0.7≒816kvar\n損失比=0.7²=0.49",c:"力率を1.0にする場合はtanθ₂=0なのでQc=P×tanθ₁です。"},
+{q:"3000kVAの変圧器にP=2000kW・cosθ=0.7の負荷。cosθ=0.95に改善して余裕容量を確保したい。コンデンサ容量と改善後の余裕容量を求めよ。",
+g:"変圧器=3000kVA  P=2000kW  cosθ₁=0.7  cosθ₂=0.95",
+ss:[
+{l:"改善前皮相電力",f:"S₁=2000/0.7≒2857kVA"},
+{l:"改善後皮相電力",f:"S₂=2000/0.95≒2105kVA"},
+{l:"Qc",f:"Qc=P(tanθ₁-tanθ₂)\n=2000×(1.020-0.328)≒1384kvar"},
+{l:"余裕容量",f:"3000-2105=895kVA"},
+],r:"Qc≒1384kvar、余裕容量895kVA",e:"S₁=2857kVA  S₂=2105kVA\nQc≒1384kvar  余裕=895kVA",c:"力率改善は電流削減・電圧改善だけでなく設備余裕の創出にも効きます。"},
+{q:"P=1000kW、cosθ₁=0.8の工場で cosθ₂=0.95 に改善。設備容量の削減量と削減率を求めよ。",
+g:"P=1000kW  cosθ₁=0.8  cosθ₂=0.95",
+ss:[
+{l:"改善前皮相電力",f:"S₁=1000/0.8=1250kVA"},
+{l:"改善後皮相電力",f:"S₂=1000/0.95≒1053kVA"},
+{l:"削減",f:"削減量=197kVA  削減率=197/1250≒15.8%"},
+],r:"設備容量を約197kVA（約16%）削減可能",e:"S₁=1250kVA  S₂≒1053kVA\n削減197kVA（16%）",c:"力率改善の経済効果は「電力料金削減」と「設備余裕創出」の両方にあります。"},
+]},
+
+{id:"p04",cat:"ps",freq:2,name:"安定度と等面積法",
+exp:{
+intro:"等面積法は同期発電機が脱調するかを電力−位相角曲線の面積の大小で判定します。加速エネルギー面積A₁と制動エネルギー面積A₂を比較します。",
+fmls:[
+{l:"電力−位相角特性",f:"P = (Ef × Vt / X) × sinδ  [W]"},
+{l:"最大送電電力",f:"Pmax = Ef × Vt / X  （δ=90°のとき）"},
+{l:"安定判別",f:"A₁ ≦ A₂ のとき安定\nA₁ = A₂ のとき安定限界"},
+],
+notes:[
+{t:"n",s:"等面積法の積分計算は試験では問われません。「A₁とA₂の大小を図で判断する」形が主です。"},
+{t:"w",s:"δ=90°で最大出力。それを超えると位相角が増えるほど出力が下がり発電機は脱調します。"},
+],
+steps:[
+{l:"Pmaxを求める",b:"Ef、Vt、Xが与えられれば Pmax=Ef×Vt/X で計算します。",f:"Pmax=Ef×Vt/X"},
+{l:"定常運転点δ₀を求める",b:"P=Pmax×sinδ₀からδ₀を求めます。",f:"sinδ₀=P/Pmax"},
+{l:"等面積法で安定を判断する",b:"事故でA₁（加速面積）が生じ、事故除去後A₂（制動面積）で相殺できるかを確認します。",f:""},
+],
+},
+qs:[
+{q:"Vs=1.0pu、Vr=1.0pu、X=0.5puの系統でP=1.0puのとき最大送電電力と位相角δを求めよ。",
+g:"Vs=Vr=1.0pu  X=0.5pu  P=1.0pu",
+ss:[
+{l:"最大送電電力",f:"Pmax=1.0×1.0/0.5=2.0pu"},
+{l:"位相角",f:"sinδ=1.0/2.0=0.5  ∴ δ=30°"},
+],r:"Pmax=2.0pu、δ=30°",e:"Pmax=Vs×Vr/X=2.0pu\nsinδ=0.5 → δ=30°",c:"δ=30°は安定余裕が大きい状態です。δ=90°まで60°の余裕があります。"},
+{q:"上記でXが0.5puから1.0puに増加（一回線停止）。新しい最大送電電力と位相角を求め、安定度への影響を述べよ。",
+g:"X:0.5→1.0pu  P=1.0pu（変化なし）",
+ss:[
+{l:"新Pmax",f:"Pmax'=1.0/1.0=1.0pu"},
+{l:"新位相角",f:"sinδ'=1.0/1.0=1.0  ∴ δ'=90°（安定限界）"},
+],r:"Pmax'=1.0pu、δ'=90°（安定限界）",e:"Pmax'=1.0pu\nsinδ'=1.0 → δ'=90°（安定限界）",c:"一回線停止でリアクタンスが2倍になると最大送電電力が半分になります。δが安定限界に達しており過負荷・事故で脱調リスクが生じます。"},
+{q:"Pmax=200MWの系統で負荷がP=50MWからP=100MWに増加。等面積法の概念で安定性を判断せよ。",
+g:"Pmax=200MW  P:50→100MW",
+ss:[
+{l:"変化前δ₀",f:"sinδ₀=50/200=0.25 → δ₀≒14.5°"},
+{l:"変化後の安定限界角",f:"sinδ新=100/200=0.5 → δ新=30°\nδmax=180°-30°=150°"},
+{l:"判定",f:"A₂（制動面積）>A₁（加速面積）\n∵ δ₀→30°の移行余裕が大きく\n  δmax=150°まで制動面積を取れる"},
+],r:"安定を維持できる（A₂>A₁）",e:"sinδ₀=0.25→δ₀≒14.5°\nsinδ新=0.5→δ新=30°\nδmaxまで制動面積十分→安定",c:"等面積法では図を描いてA₁とA₂を目視比較するのが基本です。"},
+]},
+
+{id:"p05",cat:"ps",freq:2,name:"対称座標法と地絡電流",
+exp:{
+intro:"不平衡故障の解析には対称座標法を使います。正相・逆相・零相の三つの対称分回路に分解して計算します。一線地絡が最も出題頻度の高い故障形態です。",
+fmls:[
+{l:"一線地絡電流（a相）",f:"Ia = 3×Ea / (Z₁+Z₂+Z₀)\nZ₁:正相  Z₂:逆相  Z₀:零相"},
+{l:"正相・逆相・零相電流",f:"I₁=I₂=I₀=Ea/(Z₁+Z₂+Z₀)"},
+{l:"三相短絡電流（参考）",f:"I₃φ=Ea/Z₁"},
+],
+notes:[
+{t:"n",s:"一線地絡のとき正相・逆相・零相電流は全て等しくなります（I₁=I₂=I₀）。"},
+{t:"w",s:"零相インピーダンスZ₀は変圧器の接地方式によって大きく変わります。直接接地ではZ₀が小さく地絡電流が大きくなります。"},
+],
+steps:[
+{l:"各シーケンスのZを確認する",b:"Z₁（正相）は通常の%Zから求めます。Z₂≒Z₁（近似）、Z₀は接地方式による。",f:""},
+{l:"地絡電流を計算する",b:"Ia=3Ea/(Z₁+Z₂+Z₀)に代入します。",f:"Ia=3×Ea/(Z₁+Z₂+Z₀)"},
+{l:"三相短絡と比較する",b:"Z₀の大小により地絡電流が三相短絡より大きくも小さくもなります。",f:""},
+],
+},
+qs:[
+{q:"Z₁=j0.1pu、Z₂=j0.1pu、Z₀=j0.3pu、Ea=1.0puの系統でa相一線地絡が発生。地絡電流Iaを求めよ。",
+g:"Z₁=j0.1  Z₂=j0.1  Z₀=j0.3  Ea=1.0pu",
+ss:[
+{l:"地絡電流",f:"Ia=3×1.0/(j0.1+j0.1+j0.3)\n=3/(j0.5)  |Ia|=6pu"},
+],r:"|Ia|=6pu",e:"Ia=3/(j0.5)=6pu",c:"三相短絡電流は1/0.1=10puで地絡電流（6pu）より大きい。Z₀が大きいほど地絡電流は小さくなります。"},
+{q:"上記でZ₀=j0.05pu（直接接地）に変わった場合の地絡電流を求め、三相短絡電流と比較せよ。",
+g:"Z₁=j0.1  Z₂=j0.1  Z₀=j0.05  Ea=1.0pu",
+ss:[
+{l:"地絡電流",f:"Ia=3/(j0.1+j0.1+j0.05)=3/(j0.25)=12pu"},
+{l:"三相短絡電流",f:"I₃φ=1/0.1=10pu"},
+{l:"比較",f:"地絡12pu > 三相短絡10pu"},
+],r:"|Ia|=12pu（三相短絡の1.2倍）",e:"Ia=3/(j0.25)=12pu\nI₃φ=10pu\n直接接地では地絡電流が三相短絡を上回る",c:"直接接地系統では地絡電流が三相短絡電流を超えることがあります。"},
+{q:"一線地絡時（Z₁=Z₂=Z₀=j0.2pu）の健全相電圧の大きさを概算せよ。",
+g:"Z₁=Z₂=Z₀=j0.2pu  Ea=1.0pu",
+ss:[
+{l:"シーケンス電流",f:"I₁=I₂=I₀=1/(j0.6)=-j1.667pu"},
+{l:"健全相電圧（概算）",f:"Z₁=Z₂=Z₀のとき\n健全相電圧≒√3倍（1.732pu）に上昇"},
+],r:"健全相電圧≒√3倍（1.732pu）",e:"Z₁=Z₂=Z₀のとき健全相電圧は√3倍上昇\n→絶縁設計の重要な根拠",c:"一線地絡時の健全相電圧√3倍上昇は絶縁協調の設計基準です。"},
+]},
+
+// ─── 発電 ────────────────────────────────────────────────────
+{id:"h01",cat:"hd",freq:3,name:"水力発電の出力と効率",
+exp:{
+intro:"水力発電の出力は落差・流量・効率の三つで決まります。式の変形と有効落差の考え方が頻出です。",
+fmls:[
+{l:"発電機出力",f:"P = 9.8 × Q × H × η  [kW]\nQ[m³/s]  H[m]（有効落差）  η:総合効率"},
+{l:"有効落差",f:"H = H₀ − hf  [m]"},
+{l:"逆算（流量）",f:"Q = P / (9.8 × H × η)  [m³/s]"},
+],
+notes:[
+{t:"n",s:"9.8はg=9.8m/s²と水の密度1000kg/m³を合わせた係数です。"},
+{t:"n",s:"ηは総合効率（水車効率ηt×発電機効率ηg）。分けて与えられた場合はη=ηt×ηgで計算します。"},
+],
+steps:[
+{l:"有効落差を確認する",b:"損失水頭hfが与えられていればH=H₀-hf。なければH=H₀。",f:""},
+{l:"出力を計算する",b:"P=9.8×Q×H×ηに代入します。",f:"P=9.8×Q×H×η [kW]"},
+{l:"逆算問題に対応する",b:"必要な流量Q、落差Hなど逆算形式も出ます。",f:"Q=P/(9.8×H×η)"},
+],
+},
+qs:[
+{q:"H=80m、Q=25m³/s、η=0.88の水力発電所の出力を求めよ。",
+g:"H=80m  Q=25m³/s  η=0.88",
+ss:[{l:"出力",f:"P=9.8×25×80×0.88\n=245×80×0.88=19600×0.88=17248kW≒17.2MW"}],
+r:"P≒17.2MW",e:"P=9.8QHη=9.8×25×80×0.88≒17248kW",c:"9.8×25=245→245×80=19600→×0.88と分解すると計算しやすいです。"},
+{q:"P=5000kW、H=50m、η=0.85として必要な流量Qを求めよ。",
+g:"P=5000kW  H=50m  η=0.85",
+ss:[{l:"Qを求める",f:"Q=P/(9.8×H×η)\n=5000/(9.8×50×0.85)\n=5000/416.5≒12.0m³/s"}],
+r:"Q≒12.0m³/s",e:"Q=P/(9.8Hη)=5000/416.5≒12.0m³/s",c:"「流量が求まれば取水設備の断面積設計ができる」実務直結の計算です。"},
+{q:"H₀=120m、hf=8m、Q=40m³/s、ηt=0.92、ηg=0.96として出力を求めよ。",
+g:"H₀=120m  hf=8m  Q=40m³/s  ηt=0.92  ηg=0.96",
+ss:[
+{l:"有効落差",f:"H=120-8=112m"},
+{l:"総合効率",f:"η=0.92×0.96=0.8832"},
+{l:"出力",f:"P=9.8×40×112×0.8832≒38.8MW"},
+],r:"P≒38.8MW",e:"H=112m  η=0.8832\nP=9.8×40×112×0.8832≒38.8MW",c:"総合効率はηt×ηgです。分けて与えられた場合の掛け算を忘れないよう注意してください。"},
+{q:"P=20MW、設備利用率60%（年間8760時間）の水力発電所の年間発電電力量を求めよ。",
+g:"P=20MW  設備利用率60%  年間8760h",
+ss:[
+{l:"年間稼働時間",f:"T=8760×0.6=5256h"},
+{l:"年間電力量",f:"E=20MW×5256h=105120MWh≒105.1GWh"},
+],r:"E≒105.1GWh/年",e:"T=5256h\nE=20×5256=105120MWh≒105.1GWh",c:"設備利用率（capacity factor）は水力では60〜70%程度が典型的です。"},
+]},
+
+{id:"h02",cat:"hd",freq:3,name:"火力発電の熱効率と熱サイクル",
+exp:{
+intro:"火力発電の熱効率計算、熱量バランス、コンバインドサイクルの効率向上が頻出です。",
+fmls:[
+{l:"熱効率",f:"η = 3600×P / (m_f×H_L) × 100  [%]\nP[kW]  m_f[kg/h]  H_L[kJ/kg]"},
+{l:"熱消費率",f:"q = 3600 / η  [kJ/kWh]"},
+{l:"コンバインドサイクル熱効率",f:"η_cc = η_GT + η_ST×(1-η_GT)"},
+],
+notes:[
+{t:"n",s:"熱消費率q[kJ/kWh]は「1kWhを得るための熱量」。q=3600/ηが成立します。"},
+{t:"n",s:"コンバインドサイクルは50〜60%の熱効率を実現でき、通常の蒸気タービン（40〜45%）より大幅に高くなります。"},
+],
+steps:[
+{l:"パターンを判断する",b:"「効率→熱消費率」「燃料消費量→効率」「入熱と出力→効率」のどれかを判断します。",f:""},
+{l:"単位を揃えて計算する",b:"Pは[kW]、m_fは[kg/h]、H_Lは[kJ/kg]に注意して揃えます。",f:"η=3600×P/(m_f×H_L)"},
+{l:"コンバインドの場合",b:"ガスタービンの排熱を蒸気タービンで利用するため両者の効率を組み合わせます。",f:""},
+],
+},
+qs:[
+{q:"出力500MW、燃料消費量150t/h、低発熱量43000kJ/kgのとき熱効率を求めよ。",
+g:"P=500MW  m_f=150t/h=150000kg/h  H_L=43000kJ/kg",
+ss:[{l:"熱効率",f:"η=3600×500000/(150000×43000)\n=1800M/6450M≒27.9%"}],
+r:"η≒27.9%",e:"η=3600P/(m_f H_L)=1800M/6450M≒27.9%",c:"η=3600P/(m_fH_L)の形が最も計算しやすいです。"},
+{q:"熱消費率q=9000kJ/kWhの発電所の熱効率と、P=200MWでの燃料消費量を求めよ。（H_L=44000kJ/kg）",
+g:"q=9000kJ/kWh  H_L=44000kJ/kg  P=200MW",
+ss:[
+{l:"熱効率",f:"η=3600/9000×100=40%"},
+{l:"燃料消費量",f:"m_f=q×P/H_L=9000×200000/44000≒40.9t/h"},
+],r:"η=40%、燃料消費量≒41t/h",e:"η=3600/q=40%\nm_f=qP/H_L≒40.9t/h",c:"熱消費率と効率の関係（q=3600/η）は必ず覚えてください。"},
+{q:"η_GT=0.38、η_ST=0.35のコンバインドサイクルの総合熱効率を求めよ。",
+g:"η_GT=0.38  η_ST=0.35",
+ss:[{l:"コンバインド熱効率",f:"η_cc=0.38+0.35×(1-0.38)\n=0.38+0.35×0.62\n=0.38+0.217=0.597≒59.7%"}],
+r:"η_cc≒59.7%",e:"η_cc=η_GT+η_ST(1-η_GT)=0.38+0.217=59.7%",c:"コンバインドサイクルはガスタービンの排熱（62%分）をさらに利用するため高効率になります。"},
+{q:"発電端出力600MW、所内率5%、η=42%、H_L=43000kJ/kgの火力発電所の送電端出力と燃料消費量を求めよ。",
+g:"P_g=600MW  所内率5%  η=0.42  H_L=43000kJ/kg",
+ss:[
+{l:"送電端出力",f:"P_s=600×0.95=570MW"},
+{l:"燃料消費量",f:"m_f=3600×600M/(0.42×43000)\n=2160M/18060≒119.6t/h"},
+],r:"P_s=570MW、燃料消費量≒119.6t/h",e:"P_s=570MW\nm_f=3600×600M/(0.42×43k)≒119.6t/h",c:"所内率は補機で消費する電力の割合です。送電端出力=発電端-所内消費です。"},
+]},
+// ─── 同期機 ──────────────────────────────────────────────────
+{id:"s01",cat:"sg",freq:3,name:"同期発電機の出力と安定度",
+exp:{
+intro:"同期発電機の出力はトルク角δと同期リアクタンスXsで決まります。非突極機と突極機で式が異なる点が試験のポイントです。",
+fmls:[
+{l:"非突極機の出力（一相）",f:"P=(Ef×Vt/Xs)×sinδ  [W]"},
+{l:"突極機の出力",f:"P=(Ef×Vt/Xd)×sinδ+(Vt²/2)×(1/Xq-1/Xd)×sin2δ"},
+{l:"最大出力（非突極）",f:"Pmax=Ef×Vt/Xs  （δ=90°）"},
+{l:"短絡比",f:"Ks=1/%Xs（大きいほど安定度高）"},
+],
+notes:[
+{t:"n",s:"非突極機（円筒機）はXd=Xq=Xsなのでリラクタンス項が消えます。「突極機か円筒機か」を確認してください。"},
+{t:"w",s:"線間電圧を相電圧に変換（÷√3）を忘れると答えが√3倍ずれます。"},
+],
+steps:[
+{l:"機種と与えられた量を確認する",b:"突極機か非突極機か、Ef・Vt・Xs（またはXd・Xq）・δを確認します。",f:""},
+{l:"Vtを相電圧に変換する",b:"線間電圧が与えられている場合は÷√3します。",f:"Vt(相)=Vt(線間)/√3"},
+{l:"出力を計算する",b:"非突極機: P=(Ef×Vt/Xs)×sinδに代入します。",f:"P=(Ef×Vt/Xs)×sinδ"},
+],
+},
+qs:[
+{q:"非突極同期発電機のVt=6600V（線間）、Xs=5Ω/相、Ef=8000V（相電圧）、δ=30°のとき一相分の出力を求めよ。",
+g:"Vt=6600V（線間）  Xs=5Ω/相  Ef=8000V（相）  δ=30°",
+ss:[
+{l:"相電圧に変換",f:"Vt(相)=6600/√3≒3810V"},
+{l:"一相分の出力",f:"P=(8000×3810/5)×sin30°\n=6096000×0.5≒3.05MW"},
+],r:"P≒3.05MW/相（三相≒9.14MW）",e:"Vt(相)=6600/√3≒3810V\nP=(8000×3810/5)×0.5≒3.05MW",c:"線間→相電圧変換（÷√3）を忘れると√3倍の誤差になります。"},
+{q:"Pmax=150MW（三相）にしたい。Vt=11kV（線間）、Ef=15kV（相電圧）として必要なXsを求めよ。",
+g:"Pmax=150MW（三相）  Vt=11kV（線間）  Ef=15kV（相）",
+ss:[
+{l:"相電圧に変換",f:"Vt(相)=11000/√3≒6350V"},
+{l:"一相Pmaxから逆算",f:"Pmax(相)=150M/3=50MW\nXs=Ef×Vt/Pmax=15k×6350/50M≒1.91Ω"},
+],r:"Xs≒1.91Ω",e:"Pmax(相)=50MW\nXs=15k×6350/50M≒1.91Ω",c:"三相→一相（÷3）を忘れないよう注意してください。"},
+{q:"Ks=1.2の同期発電機の%Xsを求め、短絡比が安定度に与える影響を説明せよ。",
+g:"Ks=1.2",
+ss:[
+{l:"%Xsを求める",f:"Ks=1/%Xs → %Xs=1/1.2≒83.3%"},
+{l:"安定度への影響",f:"Ks大→%Xs小→Xs小\nPmax=EfVt/Xs が大きくなる\n∴ 安定度が高くなる"},
+],r:"%Xs≒83.3%、Ks大→安定度高",e:"%Xs=1/Ks=1/1.2≒83.3%\nKs大→Xs小→Pmax大→安定度高",c:"短絡比を大きくするには鉄心を多くする必要があり機械が大型化します。「鉄機械（Ks大）は安定、銅機械（Ks小）は効率重視」と覚えてください。"},
+{q:"突極機でXd=1.0pu、Xq=0.6pu、Ef=1.2pu、Vt=1.0pu、δ=30°のとき一相分の出力を求めよ。",
+g:"Xd=1.0pu  Xq=0.6pu  Ef=1.2pu  Vt=1.0pu  δ=30°",
+ss:[
+{l:"第1項",f:"(Ef×Vt/Xd)×sinδ=(1.2/1.0)×sin30°=1.2×0.5=0.60pu"},
+{l:"第2項（リラクタンストルク）",f:"(Vt²/2)×(1/Xq-1/Xd)×sin2δ\n=(0.5)×(1.667-1.0)×sin60°\n=0.5×0.667×0.866≒0.289pu"},
+{l:"合計",f:"P=0.60+0.289≒0.889pu"},
+],r:"P≒0.889pu",e:"P=(1.2/1.0)×0.5+(0.5)×0.667×0.866≒0.889pu",c:"突極機ではリラクタンストルク（第2項）が加わるためδ<90°で最大出力になります。"},
+]},
+
+{id:"s02",cat:"sg",freq:3,name:"同期電動機のV曲線と電機子反作用",
+exp:{
+intro:"同期電動機は界磁電流を変えることで力率を制御できます。励磁不足では遅れ電流、過励磁では進み電流が流れます。V曲線はこの関係を示すグラフです。",
+fmls:[
+{l:"V曲線の最下点",f:"電機子電流最小 → 力率=1（正規励磁点）"},
+{l:"電機子反作用",f:"遅れ電流（不足励磁）→ 減磁作用\n進み電流（過励磁）  → 増磁作用"},
+{l:"Efの計算（力率1時）",f:"Ef=√(Vt²+(XsIa)²)"},
+],
+notes:[
+{t:"n",s:"同期調相機は無負荷の同期電動機を調相専用に使う設備です。界磁電流を変えるだけで進み・遅れの無効電力を連続制御できます。"},
+{t:"n",s:"「過励磁→進み電流→増磁作用→コンデンサと同じ効果」という連鎖で覚えてください。"},
+],
+steps:[
+{l:"励磁状態を確認する",b:"If>正規励磁：過励磁（進み電流）\nIf<正規励磁：不足励磁（遅れ電流）",f:""},
+{l:"電機子反作用の方向を判定する",b:"遅れ電流→減磁（磁束を弱める）\n進み電流→増磁（磁束を強める）",f:""},
+{l:"供給する無効電力を判断する",b:"過励磁→系統に進み無効電力を供給（力率改善）\n不足励磁→遅れ無効電力を吸収",f:""},
+],
+},
+qs:[
+{q:"同期電動機を過励磁で運転した場合、系統への無効電力供給方向と電機子反作用を説明せよ。",
+g:"過励磁運転の同期電動機",
+ss:[
+{l:"電流の向き",f:"過励磁→進み電流→電動機は容量性負荷"},
+{l:"無効電力の方向",f:"容量性=進み無効電力を消費\n=系統に遅れ無効電力を供給（力率改善）"},
+{l:"電機子反作用",f:"進み電流→増磁作用"},
+],r:"系統へ遅れ無効電力供給（力率改善）、電機子反作用は増磁作用",e:"過励磁→進み電流→系統へ遅れ無効電力供給\n電機子反作用: 増磁作用",c:"同期調相機として調相コンデンサと同じ役割。連続制御できる点がコンデンサバンクとの違いです。"},
+{q:"Vt=6.6kV（線間）、Ia=200A、cosθ=1.0、Xs=5Ω/相のとき起電力Efを求めよ。",
+g:"Vt=6.6kV（線間）  Ia=200A  cosθ=1.0  Xs=5Ω/相",
+ss:[
+{l:"相電圧を求める",f:"Vt(相)=6600/√3≒3810V"},
+{l:"Efを求める（力率1）",f:"Ef=√(Vt²+(XsIa)²)\n=√(3810²+(5×200)²)\n=√(14516100+1000000)\n=√15516100≒3939V≒3.94kV（相）"},
+],r:"Ef≒3.94kV（相）≒6.82kV（線間）",e:"Ef=√(3810²+1000²)≒3939V",c:"力率1のとき電圧ベクトルと電流ベクトルが同位相なのでピタゴラスの定理で求まります。"},
+{q:"Vt=1.0pu、Ia=0.8pu（遅れ、cosθ=0.8）、Xs=1.2puの同期電動機の起電力Efを求めよ。",
+g:"Vt=1.0pu  Ia=0.8pu  cosθ=0.8（遅れ）  Xs=1.2pu  sinθ=0.6",
+ss:[
+{l:"電流ベクトル",f:"Ia=0.8(0.8-j0.6)=0.64-j0.48"},
+{l:"jXsIa",f:"j1.2×(0.64-j0.48)=0.576+j0.768"},
+{l:"|Ef|",f:"Ef=(1.0+0.576)+j0.768=1.576+j0.768\n|Ef|=√(1.576²+0.768²)≒1.753pu"},
+],r:"|Ef|≒1.753pu",e:"jXsIa=0.576+j0.768\nEf=1.576+j0.768→|Ef|≒1.753pu",c:"遅れ電流（不足励磁）の場合の計算です。複素数の計算に慣れてください。"},
+]},
+
+// ─── 誘導機 ──────────────────────────────────────────────────
+{id:"i01",cat:"im",freq:3,name:"誘導電動機のすべりと電力分配",
+exp:{
+intro:"誘導電動機ではギャップ電力（二次入力）P₂がすべりsの比率で銅損と機械出力に分配されます。1:s:(1-s)の比が試験の核心です。",
+fmls:[
+{l:"すべり",f:"s=(Ns-N)/Ns"},
+{l:"二次入力の分配",f:"二次銅損 Pc₂=s×P₂\n機械出力 Pm=(1-s)×P₂"},
+{l:"比率で覚える",f:"P₂:Pc₂:Pm=1:s:(1-s)"},
+{l:"トルク",f:"T=P₂/ωs  [N·m]\nωs=2π×Ns/60"},
+],
+notes:[
+{t:"n",s:"P₂:Pc₂:Pm=1:s:(1-s)は最重要です。二次入力を1としたとき、すべり分が銅損、残りが機械出力になります。"},
+{t:"w",s:"すべりは小数（0.04）と%（4%）で与えられ方が違います。計算にはs=0.04（小数）を使います。"},
+],
+steps:[
+{l:"すべりsを求める",b:"NsとNが与えられれば s=(Ns-N)/Ns。直接与えられていればそのまま使います。",f:"s=(Ns-N)/Ns"},
+{l:"P₂を把握する",b:"一次入力P₁から一次銅損・鉄損を引くか、直接与えられます。",f:"P₂=P₁-(一次銅損+鉄損)"},
+{l:"三つの量に分配する",b:"Pc₂=s×P₂、Pm=(1-s)×P₂。足してP₂に戻ることで確認できます。",f:"Pc₂+Pm=P₂（確認）"},
+],
+},
+qs:[
+{q:"同期速度1500rpm、実回転速度1440rpm、P₂=18kWのとき、すべり・二次銅損・機械出力を求めよ。",
+g:"Ns=1500rpm  N=1440rpm  P₂=18kW",
+ss:[
+{l:"すべり",f:"s=(1500-1440)/1500=0.04（4%）"},
+{l:"二次銅損",f:"Pc₂=0.04×18=0.72kW"},
+{l:"機械出力",f:"Pm=0.96×18=17.28kW"},
+{l:"確認",f:"0.72+17.28=18kW=P₂ ✓"},
+],r:"s=0.04、Pc₂=0.72kW、Pm=17.28kW",e:"s=0.04\nPc₂=0.04×18=0.72kW\nPm=0.96×18=17.28kW",c:"確認（Pc₂+Pm=P₂）を答案に書くと採点者の信頼度が上がります。"},
+{q:"P₁=20kW、一次銅損=1kW、鉄損=0.5kW、s=0.05の誘導電動機の二次銅損・機械出力・効率を求めよ。",
+g:"P₁=20kW  一次銅損=1kW  鉄損=0.5kW  s=0.05",
+ss:[
+{l:"二次入力",f:"P₂=20-1-0.5=18.5kW"},
+{l:"二次銅損",f:"Pc₂=0.05×18.5=0.925kW"},
+{l:"機械出力",f:"Pm=0.95×18.5=17.575kW"},
+{l:"効率",f:"η=Pm/P₁=17.575/20≒87.9%"},
+],r:"Pc₂=0.925kW、Pm=17.575kW、η≒87.9%",e:"P₂=18.5kW\nPc₂=0.925kW  Pm=17.575kW\nη=17.575/20≒87.9%",c:"効率はPm（機械出力）/P₁（一次入力）で求めます。"},
+{q:"Ns=1200rpm、P₂=22kW、s=3%で運転している誘導電動機の発生トルクと回転速度を求めよ。",
+g:"Ns=1200rpm  P₂=22kW  s=0.03",
+ss:[
+{l:"同期角速度",f:"ωs=2π×1200/60=40π≒125.7rad/s"},
+{l:"発生トルク",f:"T=P₂/ωs=22000/125.7≒175N·m"},
+{l:"回転速度",f:"N=1200×(1-0.03)=1164rpm"},
+],r:"T≒175N·m、N=1164rpm",e:"ωs=40πrad/s\nT=22000/(40π)≒175N·m\nN=1200×0.97=1164rpm",c:"トルク計算はωs（同期角速度）を使います。実回転数ωrではありません。"},
+{q:"s=0.05で出力Pm=9.5kWの誘導電動機のP₂と二次銅損を求め、P₂:Pc₂:Pmの比を確認せよ。",
+g:"s=0.05  Pm=9.5kW",
+ss:[
+{l:"P₂を求める",f:"Pm=(1-s)×P₂\n9.5=0.95×P₂\nP₂=10kW"},
+{l:"二次銅損",f:"Pc₂=0.05×10=0.5kW"},
+{l:"比率確認",f:"P₂:Pc₂:Pm=10:0.5:9.5=1:0.05:0.95=1:s:(1-s) ✓"},
+],r:"P₂=10kW、Pc₂=0.5kW",e:"P₂=Pm/(1-s)=9.5/0.95=10kW\nPc₂=0.5kW\n比率=1:s:(1-s) ✓",c:"Pmが与えられてP₂を逆算するパターン。(1-s)で割ることを忘れないよう注意してください。"},
+{q:"二次抵抗制御で比例推移を適用。s=0.04でトルクT=175N·mを発生中、二次抵抗を2倍にした場合のすべりと回転速度を求めよ。（Ns=1500rpm）",
+g:"s=0.04  T=175N·m  二次抵抗×2  Ns=1500rpm",
+ss:[
+{l:"比例推移の条件",f:"r₂/s=r₂'/s'\ns'=s×(r₂'/r₂)=0.04×2=0.08"},
+{l:"回転速度",f:"N'=1500×(1-0.08)=1500×0.92=1380rpm"},
+],r:"s'=0.08、N'=1380rpm（トルクは変わらず）",e:"s'=0.04×2=0.08\nN'=1500×0.92=1380rpm",c:"比例推移は「二次抵抗を変えてもトルクは変わらず回転速度が低下する」現象です。"},
+]},
+
+// ─── 変圧器 ──────────────────────────────────────────────────
+{id:"t01",cat:"tr",freq:3,name:"変圧器の効率と最大効率条件",
+exp:{
+intro:"変圧器の損失は負荷に無関係な鉄損（固定損）と負荷電流の二乗に比例する銅損（可変損）に分かれます。最大効率条件と電圧変動率が最重要出題ポイントです。",
+fmls:[
+{l:"効率",f:"η=P₂/(P₂+Pi+m²Pcm)×100 [%]\nP₂:出力  Pi:鉄損  m:負荷率  Pcm:全負荷銅損"},
+{l:"最大効率条件",f:"Pi=m²×Pcm  →  m=√(Pi/Pcm)"},
+{l:"電圧変動率（近似）",f:"ε≒p×cosθ+q×sinθ [%]"},
+],
+notes:[
+{t:"n",s:"鉄損Piは電圧一定なら負荷に無関係に一定。銅損は電流の二乗に比例するので負荷率mのとき Pc=m²Pcmです。"},
+{t:"n",s:"電圧変動率の近似式で遅れ力率のとき ε>0（電圧降下）、進み力率のとき ε<0（電圧上昇）になります。"},
+],
+steps:[
+{l:"最大効率の負荷率を求める",b:"Pi=m²Pcm を解いて m=√(Pi/Pcm)です。",f:"m=√(Pi/Pcm)"},
+{l:"そのときの効率を計算する",b:"最大効率時は鉄損=銅損=Pi なので損失合計=2Pi。",f:"η=m×Pn×cosθ/(m×Pn×cosθ+2Pi)"},
+{l:"電圧変動率を求める",b:"p、q、cosθが与えられれば ε≒p×cosθ+q×sinθ に代入します。",f:"ε≒pcosθ+qsinθ"},
+],
+},
+qs:[
+{q:"Pn=100kVA、Pi=500W、Pcm=1200W、cosθ=1の変圧器の最大効率の負荷率と効率を求めよ。",
+g:"Pn=100kVA  Pi=500W  Pcm=1200W  cosθ=1",
+ss:[
+{l:"最大効率の負荷率",f:"m=√(500/1200)=√(5/12)≒0.645"},
+{l:"そのときの出力",f:"P₂=0.645×100000=64500W"},
+{l:"効率",f:"η=64500/(64500+2×500)=64500/65500≒98.5%"},
+],r:"m≒0.645（約65%負荷）、η≒98.5%",e:"m=√(500/1200)≒0.645\nη=64500/65500≒98.5%",c:"答案に「鉄損≒銅損」の確認を入れると採点上の信頼性が上がります。"},
+{q:"上記変圧器の全負荷時（m=1.0、cosθ=0.9）の効率を求めよ。",
+g:"Pn=100kVA  Pi=500W  Pcm=1200W  m=1.0  cosθ=0.9",
+ss:[
+{l:"全負荷時の出力",f:"P₂=1.0×100000×0.9=90000W"},
+{l:"全負荷時の損失",f:"Pi+Pcm=500+1200=1700W"},
+{l:"効率",f:"η=90000/(90000+1700)≒98.1%"},
+],r:"η≒98.1%",e:"P₂=90kW\nη=90000/91700≒98.1%",c:"全負荷時（98.1%）より最大効率（98.5%）の方が高いことを確認してください。"},
+{q:"p=1.5%、q=3.0%の変圧器にcosθ=0.8（遅れ）の負荷を接続したときの電圧変動率を求めよ。",
+g:"p=1.5%  q=3.0%  cosθ=0.8（遅れ）  sinθ=0.6",
+ss:[{l:"電圧変動率",f:"ε≒p×cosθ+q×sinθ\n=1.5×0.8+3.0×0.6=1.2+1.8=3.0%"}],
+r:"ε≒3.0%",e:"ε≒pcosθ+qsinθ=1.5×0.8+3.0×0.6=3.0%",c:"電圧変動率3.0%は「定格負荷時に二次電圧が3%低下する」という意味です。"},
+{q:"同じ変圧器（p=1.5%、q=3.0%）にcosθ=0.9（進み）の負荷を接続。電圧変動率を求めよ。",
+g:"p=1.5%  q=3.0%  cosθ=0.9（進み）  sinθ≒0.436（進みは負）",
+ss:[{l:"電圧変動率",f:"ε≒1.5×0.9+3.0×(-0.436)\n=1.35-1.308≒0.04%（ほぼゼロ）"}],
+r:"ε≒0.04%（電圧降下は極めて小さい）",e:"ε≒1.5×0.9-3.0×0.436≒0.04%",c:"進み力率負荷では電圧変動率が小さくなり、条件によっては負（電圧上昇=フェランチ効果）になります。"},
+{q:"ε=2.5%、p=1.0%、cosθ=0.8（遅れ）のとき%リアクタンス降下qを求めよ。",
+g:"ε=2.5%  p=1.0%  cosθ=0.8  sinθ=0.6",
+ss:[{l:"電圧変動率の式から逆算",f:"2.5=1.0×0.8+q×0.6\n2.5=0.8+0.6q\n0.6q=1.7  q≒2.83%"}],
+r:"q≒2.83%",e:"q=(ε-pcosθ)/sinθ=(2.5-0.8)/0.6≒2.83%",c:"電圧変動率の式を逆算してqを求めるパターンです。"},
+]},
+
+{id:"t02",cat:"tr",freq:3,name:"変圧器の並行運転と負荷分担",
+exp:{
+intro:"変圧器の並行運転では負荷分担の比率が%Zの逆比になります。容量の異なる変圧器が並列に動く場合、%Zが揃っていないと一方が過負荷になります。",
+fmls:[
+{l:"並行運転の4条件",f:"①変圧比が等しい\n②%Zが等しい（でなければ分担不均一）\n③位相変位群が等しい\n④極性が一致する"},
+{l:"負荷分担の比率",f:"P_A:P_B=%Zb:%Za（%Zの逆比）"},
+{l:"各変圧器の分担",f:"P_A=P_total×%Zb/(%Za+%Zb)\nP_B=P_total×%Za/(%Za+%Zb)"},
+],
+notes:[
+{t:"n",s:"%Zの小さい変圧器ほど多くの電流を分担します。インピーダンスが低いほど電流が流れやすいという並列回路の原理です。"},
+{t:"w",s:"変圧比が一致しない場合は循環電流が流れ、無負荷でも変圧器が加熱します。条件①が最も重要です。"},
+],
+steps:[
+{l:"%Zを同一基準容量に換算する",b:"基準容量をPbaseに統一してから計算します。",f:"%Z'=%Z×Pbase/Pn"},
+{l:"負荷分担の比率を求める",b:"P_A:P_B=%Zb:%Za（逆比）",f:"P_A:P_B=%Zb:%Za"},
+{l:"過負荷チェック",b:"各変圧器の分担容量が定格を超えないか確認します。",f:"P_A≦Pna かつ P_B≦Pnb"},
+],
+},
+qs:[
+{q:"1000kVA・%Z=4%の変圧器Aと500kVA・%Z=5%の変圧器Bを並行運転、合計800kVAの負荷に給電。各変圧器の分担容量を求めよ。",
+g:"A:1000kVA %Za=4%  B:500kVA %Zb=5%（換算が必要）",
+ss:[
+{l:"Bの%ZをA基準に換算",f:"%Zb'=5×(1000/500)=10%"},
+{l:"分担の比率",f:"P_A:P_B=%Zb':%Za=10:4=5:2"},
+{l:"各変圧器の分担",f:"P_A=800×5/7≒571kVA\nP_B=800×2/7≒229kVA"},
+{l:"過負荷チェック",f:"A:571<1000kVA ✓  B:229<500kVA ✓"},
+],r:"A≒571kVA、B≒229kVA",e:"%Zb'=10%\nP_A:P_B=10:4=5:2\nP_A=800×5/7≒571kVA  P_B≒229kVA",c:"%Zの大きいBが少なく分担するのは「%Z大→電流が流れにくい→分担小」と整理してください。"},
+{q:"上記で負荷が900kVAに増加。過負荷チェックを行い、最大供給可能容量も求めよ。",
+g:"P_total=900kVA  分担比5:2（前問同様）",
+ss:[
+{l:"各分担を再計算",f:"P_A=900×5/7≒643kVA\nP_B=900×2/7≒257kVA"},
+{l:"過負荷チェック",f:"A:643<1000kVA ✓  B:257<500kVA ✓"},
+{l:"最大供給容量",f:"Bが500kVAに達するとき P_total=500×7/2=1750kVA\nAが1000kVAに達するとき P_total=1000×7/5=1400kVA\n→ 制約はA先→最大1400kVA"},
+],r:"900kVAは問題なし。最大供給容量=1400kVA",e:"P_A≒643kVA P_B≒257kVA（両方OK）\n最大=Aの定格制限=1000×7/5=1400kVA",c:"最大供給容量は「どちらかが定格に達したとき」で決まります。"},
+{q:"%Z=5%の変圧器A（2000kVA）と%Z=4%の変圧器B（1000kVA）を並行運転。Pbase=1000kVAでの並列合成%Zを求めよ。",
+g:"A:2000kVA %Za=5%  B:1000kVA %Zb=4%  Pbase=1000kVA",
+ss:[
+{l:"Aの換算",f:"%Za'=5×(1000/2000)=2.5%"},
+{l:"並列合成%Z",f:"1/%Ztotal=1/2.5+1/4=0.4+0.25=0.65\n%Ztotal=1/0.65≒1.538%"},
+],r:"合成%Z≒1.538%",e:"%Za'=2.5%\n%Ztotal=2.5×4/(2.5+4)≒1.538%",c:"並列の%Zは積/和で求めます。合成%Zが小さくなるほど短絡電流が増大します。"},
+]},
+
+// ─── 制御工学 ────────────────────────────────────────────────
+{id:"c01",cat:"ct",freq:3,name:"伝達関数とブロック線図",
+exp:{
+intro:"伝達関数はラプラス変換で表した「入力と出力の比」です。ブロック線図ではフィードバック結合の閉ループ伝達関数を求める問題が最頻出です。",
+fmls:[
+{l:"閉ループ伝達関数",f:"W(s)=G(s)/(1+G(s)×H(s))"},
+{l:"単位フィードバック（H=1）",f:"W(s)=G(s)/(1+G(s))"},
+{l:"特性方程式",f:"1+G(s)H(s)=0"},
+],
+notes:[
+{t:"n",s:"閉ループ伝達関数の導き方：Y=G×E、E=R-H×Y を連立するとW=G/(1+GH)が導けます。公式の丸暗記より導き方を理解してください。"},
+{t:"n",s:"sは「微分演算子」です。分子にsがある→微分要素（速応性高）、分母にsがある→積分要素（定常偏差なし）と読めます。"},
+],
+steps:[
+{l:"結合形式を確認する",b:"直列:G₁×G₂  並列:G₁±G₂\nフィードバック:G/(1+GH)  単位FB:G/(1+G)",f:""},
+{l:"閉ループ伝達関数を求める",b:"前向きG(s)とフィードバックH(s)を確認してW=G/(1+GH)に代入します。",f:"W(s)=G(s)/(1+G(s)H(s))"},
+{l:"安定判別をする",b:"特性方程式1+GH=0の根の実部が全て負ならば安定。ラウス条件は係数が全て正を先に確認します。",f:""},
+],
+},
+qs:[
+{q:"G(s)=K/(s(s+2))、H(s)=1の閉ループ伝達関数と安定条件を求めよ。",
+g:"G(s)=K/(s(s+2))  H(s)=1",
+ss:[
+{l:"閉ループ伝達関数",f:"W(s)=K/(s(s+2)+K)=K/(s²+2s+K)"},
+{l:"特性方程式",f:"s²+2s+K=0"},
+{l:"ラウス安定条件",f:"係数[1,2,K]が全て正→K>0"},
+],r:"W(s)=K/(s²+2s+K)、安定条件K>0",e:"W=K/(s²+2s+K)\n特性方程式: s²+2s+K=0\nK>0のとき安定",c:"特性方程式の根が全て左半平面（実部<0）にあればシステムは安定です。"},
+{q:"G₁(s)=1/(s+1)とG₂(s)=2/(s+3)が直列、単位フィードバックの閉ループ伝達関数を求めよ。",
+g:"G₁=1/(s+1)  G₂=2/(s+3)  H=1",
+ss:[
+{l:"直列の合成",f:"G=G₁×G₂=2/((s+1)(s+3))=2/(s²+4s+3)"},
+{l:"閉ループ",f:"W=G/(1+G)=2/(s²+4s+3+2)=2/(s²+4s+5)"},
+],r:"W(s)=2/(s²+4s+5)",e:"G=2/(s²+4s+3)\nW=2/(s²+4s+5)",c:"直列合成してから閉ループを求める手順です。"},
+{q:"特性方程式 s³+4s²+5s+K=0 がラウス安定条件を満たすKの範囲を求めよ。",
+g:"特性方程式: s³+4s²+5s+K=0",
+ss:[
+{l:"ラウス行列を作る",f:"s³: 1    5\ns²: 4    K\ns¹: (4×5-K)/4=(20-K)/4\ns⁰: K"},
+{l:"第1列全て正の条件",f:"1>0 ✓  4>0 ✓\n(20-K)/4>0→K<20\nK>0\n∴ 0<K<20"},
+],r:"0<K<20",e:"ラウス行列第1列:[1,4,(20-K)/4,K]\n全て正の条件: 0<K<20",c:"三次の特性方程式でのラウス判別は頻出です。"},
+{q:"G(s)=10/(s+1)、H(s)=0.1の閉ループ伝達関数と定常ゲインを求めよ。",
+g:"G(s)=10/(s+1)  H(s)=0.1",
+ss:[
+{l:"閉ループ伝達関数",f:"W(s)=G/(1+GH)=[10/(s+1)]/(1+1/(s+1))\n=10/(s+2)"},
+{l:"定常ゲイン",f:"W(0)=10/2=5"},
+],r:"W(s)=10/(s+2)、定常ゲイン=5",e:"W(s)=10/(s+2)\nW(0)=5",c:"フィードバックH≠1の場合も公式G/(1+GH)は同じです。定常ゲインはs=0を代入するだけです。"},
+{q:"G(s)=K/(s(s+2))の単位フィードバック系でK=4のとき、ステップ応答の定常値と特性根を求めよ。",
+g:"G(s)=4/(s(s+2))  H=1",
+ss:[
+{l:"閉ループ伝達関数",f:"W(s)=4/(s²+2s+4)"},
+{l:"定常値（最終値定理）",f:"y(∞)=W(0)×R(0)=4/4=1"},
+{l:"特性根",f:"s²+2s+4=0\ns=(-2±√(4-16))/2=-1±j√3\n実部=-1<0→安定（減衰振動）"},
+],r:"定常値=1、特性根=-1±j√3（安定・減衰振動）",e:"W=4/(s²+2s+4)\ny(∞)=1\n特性根: -1±j√3（安定）",c:"特性根が複素数（実部<0）→減衰振動。実部の絶対値が大きいほど速く整定します。"},
+]},
+
+{id:"c02",cat:"ct",freq:3,name:"一次遅れと過渡応答",
+exp:{
+intro:"一次遅れ要素は制御の基本要素で時定数Tで応答の速さが決まります。ステップ入力に対して指数関数的に最終値に収束します。",
+fmls:[
+{l:"一次遅れ伝達関数",f:"G(s)=K/(1+Ts)"},
+{l:"ステップ応答（時間領域）",f:"y(t)=K×(1-e^(-t/T))"},
+{l:"時定数Tの意味",f:"t=T のとき y≒0.632K（63.2%到達）\nt=4T のとき y≒0.982K（≒整定）"},
+{l:"最終値定理",f:"y(∞)=lim[s→0] s×Y(s)"},
+],
+notes:[
+{t:"n",s:"e⁻¹≒0.368を覚えておくと、t=Tのときy=K(1-0.368)=0.632Kがすぐ出ます。「時定数後に63%」は定番出題ポイントです。"},
+{t:"n",s:"最終値定理はY(s)のsを0にするだけです。定常値を求める際に必ず使います。"},
+],
+steps:[
+{l:"パラメータを読み取る",b:"G(s)=K/(1+Ts)の形でKとTを確認します。",f:""},
+{l:"ステップ応答式を書く",b:"y(t)=K(1-e^{-t/T})に代入します。",f:"y(t)=K(1-e^(-t/T))"},
+{l:"特定時刻の値を求める",b:"t=T（時定数）のときy=0.632Kが定番の出題値です。",f:"y(T)=K(1-e⁻¹)≒0.632K"},
+],
+},
+qs:[
+{q:"G(s)=2/(1+3s)に単位ステップ入力を加えた。t=3s後の出力y(3)と定常値を求めよ。",
+g:"G(s)=2/(1+3s)  ステップ入力",
+ss:[
+{l:"パラメータ確認",f:"K=2  T=3s"},
+{l:"ステップ応答式",f:"y(t)=2(1-e^(-t/3))"},
+{l:"t=3のとき",f:"y(3)=2(1-e⁻¹)=2×0.632=1.264"},
+{l:"定常値",f:"y(∞)=K=2"},
+],r:"y(3)≒1.264、定常値=2",e:"K=2 T=3\ny(3)=2(1-e⁻¹)≒1.264\ny(∞)=2",c:"t=T後に63.2%到達。y(3)=1.264は最終値2の63.2%に相当します。"},
+{q:"G(s)=ω²/(s²+2ζωs+ω²)でω=2、ζ=0.5のステップ応答の定常値と振動性を述べよ。",
+g:"G(s)=ω²/(s²+2ζωs+ω²)  ω=2  ζ=0.5",
+ss:[
+{l:"定常値",f:"y(∞)=G(0)=ω²/ω²=1"},
+{l:"特性根",f:"s²+2s+4=0\ns=-1±j√3"},
+{l:"振動性の判定",f:"実部=-1<0→安定  ζ=0.5<1→不足制動（減衰振動）"},
+],r:"定常値=1、減衰振動応答（ζ<1）",e:"y(∞)=1\nζ=0.5<1→不足制動→減衰振動",c:"ζ<1:不足制動（振動あり）、ζ=1:臨界制動、ζ>1:過制動（振動なし）"},
+{q:"一次遅れG(s)=5/(1+0.2s)のボード線図で折れ点周波数と各周波数のゲインを求めよ。",
+g:"G(s)=5/(1+0.2s)  T=0.2s",
+ss:[
+{l:"折れ点周波数",f:"ωc=1/T=1/0.2=5rad/s\n定常ゲイン=20log10(5)≒14dB"},
+{l:"各周波数のゲイン",f:"ω≪ωc: ≒14dB（一定）\nω=ωc=5: -3dBダウン→≒11dB\nω≫ωc: -20dB/decで減衰"},
+],r:"折れ点ωc=5rad/s、低域14dB、折れ点11dB",e:"ωc=1/T=5rad/s\nω<ωc:14dB  ω=ωc:11dB  ω>ωc:-20dB/dec",c:"一次遅れのボード線図は折れ点周波数ωcで-3dB低下し、それ以上は-20dB/decで傾斜します。"},
+{q:"微分方程式 dy/dt+2y=3u（初期値ゼロ）に単位ステップ入力のとき出力y(t)を求めよ。",
+g:"dy/dt+2y=3u  y(0)=0  u(t)=1（ステップ）",
+ss:[
+{l:"ラプラス変換",f:"sY+2Y=3/s  →  Y=3/(s(s+2))"},
+{l:"部分分数展開",f:"Y=3/(2s)-3/(2(s+2))"},
+{l:"逆変換",f:"y(t)=(3/2)(1-e^(-2t))"},
+],r:"y(t)=(3/2)(1-e^{-2t})（t≧0）",e:"Y=3/(s(s+2))=3/(2s)-3/(2(s+2))\ny(t)=(3/2)(1-e^{-2t})",c:"「微分方程式→ラプラス変換→部分分数→逆変換」の4ステップで時間応答が求まります。"},
+]},
+
+{id:"c03",cat:"ct",freq:3,name:"ラプラス変換と逆変換",
+exp:{
+intro:"ラプラス変換は時間領域の微分方程式をsの代数方程式に変換する道具です。制御計算の根拠として理解しておくと伝達関数の式が自然に読めるようになります。",
+fmls:[
+{l:"重要な変換対",f:"1（ステップ） → 1/s\ne^(-at)        → 1/(s+a)\nt              → 1/s²\nsinωt         → ω/(s²+ω²)\ncosωt         → s/(s²+ω²)"},
+{l:"微分・積分",f:"d/dt → s（微分）\n∫dt  → 1/s（積分）"},
+{l:"最終値定理",f:"f(∞)=lim[s→0] s×F(s)"},
+{l:"初期値定理",f:"f(0⁺)=lim[s→∞] s×F(s)"},
+],
+notes:[
+{t:"n",s:"「d/dt→s」はラプラス変換の最重要対応です。微分方程式をsの多項式に書き換える操作がすぐ理解できます。"},
+{t:"n",s:"最終値定理は「s×F(s)のsを0にするだけ」です。定常値を求める際に必ず使います。"},
+],
+steps:[
+{l:"変換対の表を理解する",b:"e^(-at)→1/(s+a)の意味：積分定義に代入するとs+aが分母に出てくることから導けます。",f:""},
+{l:"微分方程式をs領域に変換する",b:"dy/dt+ay=u を変換するとsY+aY=U → G=Y/U=1/(s+a) が伝達関数です。",f:"sY+aY=U → G=1/(s+a)"},
+{l:"部分分数展開して逆変換する",b:"F(s)の分母を因数分解し、部分分数に分解してから各項を逆変換します。",f:"A/(s+a) → A×e^(-at)"},
+],
+},
+qs:[
+{q:"F(s)=3/(s(s+3))を逆ラプラス変換してf(t)を求めよ。",
+g:"F(s)=3/(s(s+3))",
+ss:[
+{l:"部分分数展開",f:"3/(s(s+3))=A/s+B/(s+3)\ns=0: A=1  s=-3: B=-1\n∴ F(s)=1/s-1/(s+3)"},
+{l:"逆変換",f:"1/s→1（単位ステップ）\n1/(s+3)→e^(-3t)\n∴ f(t)=1-e^(-3t) (t≧0)"},
+{l:"確認（最終値定理）",f:"lim[s→0]s×3/(s(s+3))=3/3=1=f(∞) ✓"},
+],r:"f(t)=1-e^{-3t}（t≧0）",e:"F(s)=1/s-1/(s+3)\nf(t)=1-e^{-3t}",c:"部分分数展開→逆変換の流れは制御計算で繰り返し使います。"},
+{q:"F(s)=2s/(s²+4)を逆ラプラス変換してf(t)を求めよ。",
+g:"F(s)=2s/(s²+4)",
+ss:[
+{l:"変換対を確認",f:"cosωt → s/(s²+ω²)\nω²=4 → ω=2"},
+{l:"逆変換",f:"F(s)=2×s/(s²+4)\n∴ f(t)=2×cos(2t)"},
+],r:"f(t)=2cos(2t)",e:"F(s)=2s/(s²+4)\n∵ s/(s²+ω²)→cosωt（ω=2）\nf(t)=2cos2t",c:"cos・sinのラプラス変換対を覚えておくと逆変換が即時にできます。"},
+{q:"F(s)=(s+3)/(s²+5s+6)を逆ラプラス変換してf(t)を求めよ。",
+g:"F(s)=(s+3)/((s+2)(s+3))",
+ss:[
+{l:"因数分解",f:"s²+5s+6=(s+2)(s+3)"},
+{l:"約分",f:"F(s)=(s+3)/((s+2)(s+3))=1/(s+2)"},
+{l:"逆変換",f:"f(t)=e^(-2t)"},
+],r:"f(t)=e^{-2t}",e:"F(s)=(s+3)/((s+2)(s+3))=1/(s+2)\nf(t)=e^{-2t}",c:"約分できる場合は先に簡単化してから逆変換します。"},
+{q:"F(s)=5/(s²+2s+5)を逆ラプラス変換してf(t)を求めよ。",
+g:"F(s)=5/(s²+2s+5)",
+ss:[
+{l:"分母を完全平方化",f:"s²+2s+5=(s+1)²+4"},
+{l:"変換対の形に合わせる",f:"F(s)=5/((s+1)²+4)\n=(5/2)×2/((s+1)²+2²)"},
+{l:"逆変換",f:"e^(-at)sinωt → ω/((s+a)²+ω²)\n∴ f(t)=(5/2)e^(-t)sin(2t)"},
+],r:"f(t)=(5/2)e^{-t}sin(2t)",e:"分母=(s+1)²+4\nF=(5/2)×2/((s+1)²+4)\nf(t)=(5/2)e^{-t}sin2t",c:"完全平方化して e^{-at}sinωt 型の変換対に持ち込む手順が重要です。"},
+]},
+
+{id:"c04",cat:"ct",freq:2,name:"PI・PID制御と定常偏差",
+exp:{
+intro:"PI・PID制御器は定常偏差除去・応答改善のために使われます。各要素の伝達関数と効果を整理します。",
+fmls:[
+{l:"P制御",f:"Gc(s)=Kp"},
+{l:"PI制御",f:"Gc(s)=Kp(1+1/(Ti×s))=Kp(Ti×s+1)/(Ti×s)"},
+{l:"PID制御",f:"Gc(s)=Kp(1+1/(Ti×s)+Td×s)"},
+{l:"定常偏差",f:"e(∞)=lim[s→0] s×E(s)"},
+],
+notes:[
+{t:"n",s:"I（積分）要素は分母にsがあるため定常偏差を0にする効果があります。「積分が過去の誤差を蓄積して補正する」イメージです。"},
+{t:"n",s:"D（微分）要素は分子にsがあるため速応性を高めますが、ノイズを増幅するデメリットがあります。"},
+],
+steps:[
+{l:"各要素の効果を確認する",b:"P: ゲインを上げる（定常偏差は残る）\nI: 定常偏差を0にする（応答が遅くなりやすい）\nD: 応答を速くする（ノイズに弱い）",f:""},
+{l:"定常偏差を求める",b:"最終値定理でe(∞)=lim[s→0]s×E(s)を計算します。I要素があればe(∞)=0になります。",f:"e(∞)=lim[s→0]s×E(s)"},
+],
+},
+qs:[
+{q:"P制御（Gc=Kp）、G=1/(s+1)、H=1の単位フィードバック系で単位ステップ入力の定常偏差を求めよ。",
+g:"Gc=Kp  G=1/(s+1)  H=1",
+ss:[
+{l:"閉ループ",f:"W=Kp/(s+1+Kp)"},
+{l:"定常偏差",f:"e(∞)=lim[s→0](1-W)=1-Kp/(1+Kp)=1/(1+Kp)"},
+],r:"e(∞)=1/(1+Kp)",e:"e(∞)=1/(1+Kp)",c:"P制御では定常偏差は1/(1+Kp)で、Kpをいくら大きくしてもゼロにはなりません。"},
+{q:"PI制御（Gc=Kp(1+1/(Tis))）、同じ系でステップ入力の定常偏差を求めよ。",
+g:"Gc=Kp(1+1/(Tis))  G=1/(s+1)  H=1",
+ss:[
+{l:"開ループGcG",f:"GcG=Kp(Tis+1)/(Tis(s+1))"},
+{l:"s→0での開ループゲイン",f:"lim[s→0]GcG→∞（Iのため）"},
+{l:"定常偏差",f:"e(∞)=1/(1+∞)=0"},
+],r:"e(∞)=0（I要素により定常偏差ゼロ）",e:"GcG(s→0)→∞\n∴ e(∞)=0",c:"I要素があると開ループゲインがs→0で∞になり定常偏差が自動的に0になります。"},
+{q:"G=K/(s(s+a))（K=10,a=3）の単位フィードバック系（Gc=1）で特性方程式と定常速度偏差を求めよ。",
+g:"G=10/(s(s+3))  Gc=1  H=1  ランプ入力R=1/s²",
+ss:[
+{l:"特性方程式",f:"1+G=0 → s(s+3)+10=0\ns²+3s+10=0"},
+{l:"速度定数",f:"Kv=lim[s→0]s×G=10/3"},
+{l:"定常速度偏差",f:"e_v=1/Kv=3/10=0.3"},
+],r:"特性方程式: s²+3s+10=0、定常速度偏差=0.3",e:"1+G=0→s²+3s+10=0\nKv=10/3  e_v=0.3",c:"ステップ→定常偏差0（I系）、ランプ→定常速度偏差=1/Kv（P制御ではゼロにならない）。"},
+]},
+
+
+{id:"i02",cat:"im",freq:2,name:"誘導電動機の速度制御と比例推移",
+exp:{
+intro:"誘導電動機の速度制御には周波数制御（インバータ）、二次抵抗制御、極数切換などがあります。二次抵抗制御の原理「比例推移」の理解が試験のポイントです。",
+fmls:[
+{l:"比例推移の条件",f:"r₂/s = r₂'/s'  （同じトルクで成立）\n∴ s' = s × (r₂'/r₂)"},
+{l:"最大トルクのすべり",f:"sm ≒ r₂/(x₁+x₂)  （r₁≪の近似）"},
+{l:"同期速度（rpm）",f:"Ns = 120f/p  （f:周波数  p:極数）"},
+{l:"V/f一定制御",f:"V/f = 一定 → 磁束一定・トルク特性を維持"},
+],
+notes:[
+{t:"n",s:"比例推移は「二次抵抗を変えてもトルクは変わらず、そのすべりが移動する」現象です。クレーンや巻き上げ機の速度制御に使われます。"},
+{t:"w",s:"二次抵抗制御は銅損が増大するため効率が低下します。すべりを大きくするほど二次銅損（=s×P₂）が増えます。"},
+],
+steps:[
+{l:"比例推移の条件を確認する",b:"r₂/s=一定の条件から、新しい抵抗r₂'での新しいすべりs'を求めます。",f:"s'=s×(r₂'/r₂)"},
+{l:"新しい回転速度を求める",b:"N=Ns(1-s)から回転速度を計算します。",f:"N'=Ns×(1-s')"},
+{l:"損失変化を確認する",b:"二次銅損=s×P₂なので、sが大きくなると損失が増えます。",f:"Pc₂=s×P₂"},
+],
+},
+qs:[
+{q:"s=0.05で定格トルクを発生中の誘導電動機の二次抵抗をr₂から2r₂に増加。同じトルクでの新しいすべりと回転速度を求めよ。（Ns=1500rpm）",
+g:"s=0.05  r₂'=2r₂  Ns=1500rpm",
+ss:[
+{l:"比例推移の条件から",f:"s'=s×(r₂'/r₂)=0.05×2=0.10"},
+{l:"新しい回転速度",f:"N'=1500×(1-0.10)=1350rpm"},
+{l:"元の回転速度と比較",f:"元: N=1500×0.95=1425rpm\n新: N'=1350rpm（75rpm低下）"},
+],r:"s'=0.10、N'=1350rpm",e:"s'=0.05×2=0.10\nN'=1500×0.90=1350rpm",c:"同じトルクのまま回転速度を下げられます。ただし二次銅損はs'=0.10でsが2倍になり損失も2倍です。"},
+{q:"前問でP₂=20kWのとき、二次銅損の変化を確認せよ。",
+g:"P₂=20kW  s=0.05（元）  s'=0.10（二次抵抗増加後）",
+ss:[
+{l:"元の二次銅損",f:"Pc₂=0.05×20=1kW"},
+{l:"新しい二次銅損",f:"Pc₂'=0.10×20=2kW（2倍）"},
+{l:"機械出力の変化",f:"Pm=（1-s）P₂=0.95×20=19kW→0.90×20=18kW"},
+],r:"二次銅損が1kW→2kW（2倍）に増大",e:"Pc₂=0.05×20=1kW\nPc₂'=0.10×20=2kW",c:"二次抵抗制御は速度制御できますが、すべりが大きくなるほど損失が増えます。インバータ制御が普及した理由がここにあります。"},
+{q:"4極機でV/f=一定制御（VVVF）で周波数を60Hzから30Hzに下げた。同期速度と最大トルクはどう変わるか。",
+g:"f:60Hz→30Hz  極数p=4  V/f=一定（Vも半分）",
+ss:[
+{l:"同期速度の変化",f:"60Hz: Ns=120×60/4=1800rpm\n30Hz: Ns'=120×30/4=900rpm（半分）"},
+{l:"最大トルクの変化",f:"V/f一定のとき最大トルク∝V\nVが半分→Tmax約半分"},
+],r:"同期速度1800→900rpm（半分）、最大トルクも約半分",e:"Ns=120f/p: 1800→900rpm\nV/f一定→Tmax∝V→半分",c:"V/f=一定制御は磁束を一定に保つための制御です。低速域ではVブーストで補正が行われます。"},
+{q:"誘導電動機の二次抵抗を外部で変えてs=0.04からs=0.16にした（比例推移）。二次抵抗は何倍になったか。またP₂=15kWのとき二次銅損と機械出力を求めよ。",
+g:"s₁=0.04  s₂=0.16  P₂=15kW",
+ss:[
+{l:"二次抵抗の倍率",f:"r₂'/r₂=s'/s=0.16/0.04=4倍"},
+{l:"二次銅損",f:"Pc₂=s'×P₂=0.16×15=2.4kW"},
+{l:"機械出力",f:"Pm=(1-s')×P₂=0.84×15=12.6kW"},
+],r:"抵抗4倍、Pc₂=2.4kW、Pm=12.6kW",e:"r₂'/r₂=s'/s=4倍\nPc₂=0.16×15=2.4kW\nPm=0.84×15=12.6kW",c:"比例推移の逆算パターンです。すべりの比=抵抗の比という関係を使います。"},
+]},
+
+{id:"s03",cat:"sg",freq:2,name:"短絡比と同期インピーダンス",
+exp:{
+intro:"短絡比Ksは同期発電機の「安定度と電圧変動の指標」です。短絡比が大きいほど安定度が高く電圧変動が少ない反面、機械が大型化します。",
+fmls:[
+{l:"短絡比の定義",f:"Ks = Io/Is = 1/%Xs\nIo:無負荷定格電圧での界磁電流\nIs:三相短絡定格電流での界磁電流"},
+{l:"%Xsとの関係",f:"%Xs = 1/Ks × 100  [%]"},
+{l:"安定度との関係",f:"Ks大 → %Xs小 → Xs小\n→ Pmax=EfVt/Xs 大 → 安定度高"},
+{l:"鉄機械・銅機械",f:"鉄機械: Ks大（安定、大型・重）\n銅機械: Ks小（不安定、小型・軽）"},
+],
+notes:[
+{t:"n",s:"「短絡比が大きい→鉄を多く使う→鉄機械→安定度高」という連鎖で覚えてください。"},
+{t:"w",s:"短絡比は同期発電機のみの概念です。同期電動機でも安定度の指標として使われます。"},
+],
+steps:[
+{l:"短絡比とXsの関係を確認する",b:"Ks=1/%Xsなので、Ksが与えられれば%Xsが求まります。",f:"%Xs=100/Ks [%]"},
+{l:"安定度への影響を判断する",b:"Ks大→Xs小→Pmax=EfVt/Xs大→安定度高",f:"Pmax=EfVt/Xs"},
+{l:"機械の特徴と比較する",b:"水車発電機（低速・突極）はKsが大きく、タービン発電機（高速・円筒）はKsが小さい傾向があります。",f:""},
+],
+},
+qs:[
+{q:"Ks=0.8の同期発電機の%Xsを求め、安定度への影響を述べよ。",
+g:"Ks=0.8",
+ss:[
+{l:"%Xsを求める",f:"%Xs=100/Ks=100/0.8=125%"},
+{l:"安定度への影響",f:"Ks=0.8<1→銅機械寄り\n%Xs=125%→Xs大→Pmax小→安定度低"},
+],r:"%Xs=125%、安定度は低い（銅機械）",e:"%Xs=100/Ks=125%\nKs<1→不安定側",c:"Ks<1は銅機械寄りで安定度が低い状態です。タービン発電機では典型的な値です。"},
+{q:"Ks=1.2の発電機でXs=1.2puのとき、三相短絡電流を求めよ。（Ea=1.0pu）",
+g:"Ks=1.2  Xs=1.2pu  Ea=1.0pu（もしくは%Xs=1/Ks×100）",
+ss:[
+{l:"%Xsを確認",f:"%Xs=100/Ks=100/1.2≒83.3%"},
+{l:"三相短絡電流",f:"Is=In×(100/%Xs)=In×(100/83.3)≒1.2In\nまたは Is=Ea/Xs=1.0/1.2≒0.833pu"},
+],r:"Is≒0.833pu（または定格の1.2倍）",e:"%Xs=83.3%\nIs=Ea/Xs=1.0/1.2≒0.833pu",c:"Ksは「無負荷界磁電流/短絡界磁電流」の比であり、Is_pu=Ks×Ia_nの関係があります。"},
+{q:"水車発電機（Ks=1.5）とタービン発電機（Ks=0.7）を比較。%Xs、安定度、機械の特徴を整理せよ。",
+g:"水車発電機: Ks=1.5  タービン発電機: Ks=0.7",
+ss:[
+{l:"水車発電機",f:"%Xs=100/1.5≒66.7%\nKs大→鉄機械→安定度高・大型・重"},
+{l:"タービン発電機",f:"%Xs=100/0.7≒142.9%\nKs小→銅機械→安定度低・小型・軽"},
+{l:"比較まとめ",f:"水車: Ks大・%Xs小・安定\nタービン: Ks小・%Xs大・不安定寄り"},
+],r:"水車%Xs≒66.7%（安定）、タービン%Xs≒142.9%（不安定寄り）",e:"水車: %Xs=66.7%（Ks=1.5）→安定\nタービン: %Xs=142.9%（Ks=0.7）→不安定寄り",c:"水車発電機は突極機で鉄心が多く（鉄機械）、タービン発電機は円筒機で銅巻線の割合が高い（銅機械）です。"},
+]},
+
+{id:"t03",cat:"tr",freq:3,name:"変圧器の電圧変動率",
+exp:{
+intro:"電圧変動率εは「無負荷時の二次電圧と全負荷時の二次電圧の差」を無負荷電圧に対する百分率で表したものです。力率によって大きく変わります。",
+fmls:[
+{l:"電圧変動率（近似式）",f:"ε ≒ p×cosθ + q×sinθ  [%]\np:%抵抗降下  q:%リアクタンス降下"},
+{l:"%抵抗降下",f:"p = (I×R/V) × 100  [%]"},
+{l:"%リアクタンス降下",f:"q = (I×X/V) × 100  [%]"},
+{l:"電圧変動率の別形式",f:"ε = (V₂₀ - V₂) / V₂₀ × 100  [%]\nV₂₀:無負荷二次電圧  V₂:全負荷二次電圧"},
+],
+notes:[
+{t:"n",s:"遅れ力率（cosθ遅れ）のときε>0（電圧が下がる）、進み力率（cosθ進み）のときε<0（電圧が上がる）になります。"},
+{t:"w",s:"εが負になること（電圧が上昇）がフェランチ効果です。進み力率負荷や無負荷の長距離送電線で発生します。"},
+],
+steps:[
+{l:"p・q・cosθを確認する",b:"問題から%抵抗降下p、%リアクタンス降下q、力率cosθを読み取ります。",f:""},
+{l:"電圧変動率を計算する",b:"ε≒p×cosθ+q×sinθに代入します。sinθ=√(1-cos²θ)で求めます。",f:"ε≒pcosθ+qsinθ"},
+{l:"逆算問題に対応する",b:"εとcosθが与えられてpやqを求める逆算パターンもあります。",f:"q=(ε-pcosθ)/sinθ"},
+],
+},
+qs:[
+{q:"p=2.0%、q=4.0%の変圧器にcosθ=0.8（遅れ）の負荷を接続。電圧変動率を求めよ。",
+g:"p=2.0%  q=4.0%  cosθ=0.8（遅れ）  sinθ=0.6",
+ss:[
+{l:"電圧変動率",f:"ε≒p×cosθ+q×sinθ\n=2.0×0.8+4.0×0.6\n=1.6+2.4=4.0%"},
+],r:"ε=4.0%",e:"ε=2.0×0.8+4.0×0.6=4.0%",c:"電圧変動率4.0%は「全負荷時に二次電圧が4%低下する」という意味です。"},
+{q:"同じ変圧器（p=2.0%、q=4.0%）にcosθ=0.9（進み）の負荷を接続。電圧変動率を求めよ。",
+g:"p=2.0%  q=4.0%  cosθ=0.9（進み）  sinθ≒0.436（負）",
+ss:[
+{l:"sinθを確認",f:"sinθ=√(1-0.81)≒0.436\n進み（容量性）なのでsinθを負として扱う"},
+{l:"電圧変動率",f:"ε≒2.0×0.9+4.0×(-0.436)\n=1.8-1.744≒0.06%（ほぼゼロ）"},
+],r:"ε≒0.06%（電圧変動ほぼなし）",e:"ε≒2.0×0.9-4.0×0.436≒0.06%",c:"進み力率負荷では電圧変動率が小さくなるか負（電圧上昇）になります。これがフェランチ効果の変圧器での現れ方です。"},
+{q:"ε=3.5%、p=1.5%、cosθ=0.85（遅れ）のとき%リアクタンス降下qを求めよ。",
+g:"ε=3.5%  p=1.5%  cosθ=0.85  sinθ=√(1-0.7225)≒0.527",
+ss:[
+{l:"電圧変動率の式から逆算",f:"3.5=1.5×0.85+q×0.527\n3.5=1.275+0.527q\n0.527q=2.225\nq≒4.22%"},
+],r:"q≒4.22%",e:"q=(ε-pcosθ)/sinθ=(3.5-1.275)/0.527≒4.22%",c:"電圧変動率の式を逆算してqを求めるパターンです。式の変形を練習してください。"},
+{q:"無負荷時の二次電圧が3300V、全負荷cosθ=0.8（遅れ）時の二次電圧が3234Vのとき電圧変動率を求めよ。",
+g:"V₂₀=3300V  V₂=3234V  cosθ=0.8（遅れ）",
+ss:[
+{l:"電圧変動率を定義から求める",f:"ε=(V₂₀-V₂)/V₂₀×100\n=(3300-3234)/3300×100\n=66/3300×100=2.0%"},
+],r:"ε=2.0%",e:"ε=(3300-3234)/3300×100=2.0%",c:"電圧変動率は定義から直接計算することもできます。近似式は逆方向（p・qから求める）にも使います。"},
+]},
+
+{id:"c05",cat:"ct",freq:2,name:"周波数応答とボード線図",
+exp:{
+intro:"周波数応答はG(jω)の大きさ（ゲイン）と位相を周波数ωの関数として表したものです。ボード線図はゲイン[dB]と位相[度]を対数周波数軸にプロットします。",
+fmls:[
+{l:"ゲイン[dB]",f:"G_dB = 20×log₁₀|G(jω)|  [dB]"},
+{l:"一次遅れのゲイン",f:"|G(jω)| = K/√(1+(ωT)²)\n折れ点ωc=1/T で -3dB"},
+{l:"積分要素",f:"G(s)=1/s → G(jω)=1/(jω)\nゲイン=-20dB/dec  位相=-90°"},
+{l:"微分要素",f:"G(s)=s → G(jω)=jω\nゲイン=+20dB/dec  位相=+90°"},
+{l:"ゲイン余裕・位相余裕",f:"ゲイン余裕: 位相が-180°のときのゲインの逆数[dB]\n位相余裕: ゲインが0dBのときの位相と-180°の差"},
+],
+notes:[
+{t:"n",s:"折れ点周波数ωc=1/Tで覚えてください。ωcより低周波ではゲイン一定（K）、高周波では-20dB/decで減衰します。"},
+{t:"w",s:"ゲイン余裕・位相余裕が大きいほど安定余裕が大きいです。設計目標として位相余裕30〜60°が一般的です。"},
+],
+steps:[
+{l:"各要素のボード線図を描く",b:"比例要素:水平線\n積分要素(1/s):-20dB/dec・位相-90°\n一次遅れ:折れ点周波数ωcで-3dBダウン後-20dB/dec",f:""},
+{l:"複数要素を合成する",b:"直列接続のゲインはdBで加算できます。位相も代数和します。",f:"G_dB(合計)=G₁_dB+G₂_dB"},
+{l:"安定余裕を確認する",b:"ゲイン余裕>0dB かつ 位相余裕>0°であれば安定です。",f:""},
+],
+},
+qs:[
+{q:"G(s)=10/(1+0.1s)のボード線図で折れ点周波数と定常ゲインを求め、ω=1,10,100rad/sでのゲイン[dB]を概算せよ。",
+g:"G(s)=10/(1+0.1s)  T=0.1s",
+ss:[
+{l:"折れ点周波数",f:"ωc=1/T=1/0.1=10rad/s"},
+{l:"定常ゲイン",f:"20log₁₀(10)=20dB"},
+{l:"各周波数のゲイン",f:"ω=1≪ωc: ≒20dB（一定）\nω=10=ωc: -3dBダウン→≒17dB\nω=100≫ωc: -20dB/dec×1dec→≒20-20=0dB"},
+],r:"ωc=10rad/s、定常20dB",e:"ωc=10rad/s\nω=1:20dB  ω=10:17dB  ω=100:0dB",c:"一次遅れは折れ点ωcより高周波で-20dB/decで減衰します。この折れ線近似を頭に描けるようにしてください。"},
+{q:"G(s)=1/(s(1+s))の開ループ系でゲイン交差周波数と位相余裕を求めよ。",
+g:"G(s)=1/(s(1+s))  H=1",
+ss:[
+{l:"ゲイン交差周波数ωgcを求める",f:"|G(jω)|=1/（ω√(1+ω²)）=1\nω²(1+ω²)=1\nω⁴+ω²-1=0\nω²=(-1+√5)/2≒0.618\nωgc≒0.786rad/s"},
+{l:"位相を求める",f:"∠G(jωgc)=-90°-arctan(ωgc)\n=-90°-arctan(0.786)\n≒-90°-38.2°=-128.2°"},
+{l:"位相余裕",f:"PM=180°-128.2°=51.8°"},
+],r:"ωgc≒0.786rad/s、位相余裕≒51.8°",e:"ωgc≒0.786rad/s\n∠G=-90°-arctan(0.786)≒-128.2°\nPM=180°-128.2°=51.8°",c:"位相余裕51.8°は設計目標（30〜60°）の範囲内です。このシステムは安定余裕十分と言えます。"},
+{q:"G(s)=K/s、H(s)=1の系でゲイン余裕と位相余裕を求めよ。",
+g:"G(s)=K/s  H=1（純積分系）",
+ss:[
+{l:"位相を求める",f:"∠G(jω)=-90°（全周波数で一定）"},
+{l:"位相交差周波数",f:"∠G=-180°となるωは存在しない（-90°で一定）"},
+{l:"安定余裕の判断",f:"位相が-180°に達しないため\nゲイン余裕=∞、位相余裕=90°"},
+],r:"ゲイン余裕=∞、位相余裕=90°（常に安定）",e:"∠G(jω)=-90°（一定）\n→位相が-180°に達しない\n∴ゲイン余裕∞、位相余裕90°",c:"純積分系（1/s）は位相が常に-90°なので位相が-180°に達せず常に安定です。"},
+]},
+
+{id:"p06",cat:"ps",freq:2,name:"フェランチ効果と充電電流",
+exp:{
+intro:"長距離送電線や地中ケーブルでは対地静電容量が大きく、軽負荷・無負荷時に充電電流（進み電流）が流れます。この電流がリアクタンスで電圧上昇を引き起こす現象がフェランチ効果です。",
+fmls:[
+{l:"充電電流",f:"Ic = 2πf×C×V  [A]\nV:相電圧  C:対地静電容量[F]"},
+{l:"充電容量（三相）",f:"Qc = 3×Ic×V = 3×(2πf)×C×V²  [var]"},
+{l:"フェランチ効果",f:"受電端電圧 Vr > 送電端電圧 Vs"},
+{l:"対策",f:"分路リアクトル（遅れ無効電力で進み分を打ち消す）"},
+],
+notes:[
+{t:"n",s:"フェランチ効果の対策は分路リアクトルの接続です。リアクトルの遅れ無効電力でコンデンサ分（進み無効電力）を打ち消します。"},
+{t:"w",s:"フェランチ効果は「受電端電圧が送電端電圧を上回る」現象です。通常の電圧降下とは逆向きになる点を押さえてください。"},
+],
+steps:[
+{l:"発生条件を確認する",b:"長距離送電線・地中ケーブル、軽負荷または無負荷、進み電流が流れる状況で発生します。",f:""},
+{l:"充電電流を計算する",b:"C（対地静電容量）とfが与えられれば Ic=2πfCV で充電電流を算出します。",f:"Ic=2πf×C×V"},
+{l:"対策を述べる",b:"分路リアクトルを受電端・送電端に接続して遅れ無効電力を供給し、進み無効電力を打ち消します。",f:""},
+],
+},
+qs:[
+{q:"C=0.01μF/km、線路長100km、系統電圧66kV（線間）、f=60Hzの無負荷送電線の充電電流を求めよ。",
+g:"C=0.01μF/km×100km=1μF  V=66/√3kV≒38.1kV  f=60Hz",
+ss:[
+{l:"充電電流",f:"Ic=2πf×C×V\n=2π×60×1×10⁻⁶×38100\n=376.8×10⁻⁶×38100≒14.4A"},
+],r:"Ic≒14.4A",e:"Ic=2πfCV=2π×60×10⁻⁶×38100≒14.4A",c:"充電電流は進み電流です。無負荷時にこの進み電流がリアクタンスXで電圧を上昇させるのがフェランチ効果の原理です。"},
+{q:"前問の充電容量（三相）を求め、これを打ち消す分路リアクトルの容量を求めよ。",
+g:"Ic=14.4A（相電流）  V=38.1kV（相電圧）",
+ss:[
+{l:"充電容量",f:"Qc=3×Ic×V=3×14.4×38100\n=3×548640≒1.65Mvar"},
+{l:"分路リアクトルの容量",f:"≒1.65Mvar（充電容量と等しくする）"},
+],r:"充電容量≒1.65Mvar、分路リアクトル≒1.65Mvar",e:"Qc=3×14.4×38.1k≒1.65Mvar\n分路リアクトル=1.65Mvar",c:"分路リアクトルは変電所の軽負荷時に投入して電圧上昇を抑制します。施設管理でも変電所の調相設備として登場する知識です。"},
+{q:"フェランチ効果が発生する条件を3つ挙げ、それぞれの対策を述べよ。",
+g:"（論述問題）",
+ss:[
+{l:"発生条件①",f:"長距離送電線：対地静電容量Cが大きい"},
+{l:"発生条件②",f:"軽負荷・無負荷時：遅れ電流による打ち消しがない"},
+{l:"発生条件③",f:"地中ケーブル：架空線より静電容量が数十倍大きい"},
+{l:"対策",f:"①②③共通：分路リアクトルの接続\n②軽負荷時：変圧器のタップを変える"},
+],r:"条件：長距離・軽負荷・地中ケーブル\n対策：分路リアクトル接続",e:"発生条件: 長距離送電線・軽負荷・地中ケーブル\n対策: 分路リアクトル接続（遅れ無効電力で充電電力を補償）",c:"試験では「なぜ発生するか」と「どう対策するか」がセットで問われます。原理→対策の流れで覚えてください。"},
+]},
+
+{id:"p07",cat:"ps",freq:2,name:"保護継電器の動作値整定",
+exp:{
+intro:"保護継電器は系統の異常（過電流・地絡・差動）を検出して遮断器をトリップさせます。整定値の計算は試験で頻出です。",
+fmls:[
+{l:"過電流継電器（OCR）の整定",f:"整定電流 = 負荷電流（最大）× 整定倍率\n（通常1.2〜2.0倍）"},
+{l:"CT変流比から整定値換算",f:"I_CT_2次 = I_1次 / CT比\n一次整定値 = 二次整定値 × CT比"},
+{l:"差動継電器（比率差動）",f:"差動電流 = |I₁ − I₂|\n比率差動: 差動電流/平均電流 ≧ 整定値で動作"},
+],
+notes:[
+{t:"n",s:"継電器の整定は「感度（小さな事故も検出）」と「選択性（必要な部分だけ遮断）」のトレードオフです。"},
+{t:"w",s:"CTの変流比を忘れると整定値が一次側・二次側で混同します。問題文で「CT比」を必ず確認してください。"},
+],
+steps:[
+{l:"保護対象の電流値を求める",b:"定格電流や短絡電流を計算します。",f:"In=Pn/(√3×Vn)"},
+{l:"CT変流比を考慮する",b:"CT二次電流=一次電流/CT比。継電器は二次電流に対して整定します。",f:"I_CT_2次=I_1次/CT比"},
+{l:"整定倍率を掛ける",b:"過電流継電器は負荷電流の1.2〜2.0倍で整定します。",f:""},
+],
+},
+qs:[
+{q:"定格電流250A、CT比300/5の系統の過電流継電器の整定電流（二次側）を求めよ。整定倍率は1.5倍。",
+g:"In=250A  CT比300/5（=60倍）  整定倍率1.5",
+ss:[
+{l:"CT二次電流",f:"I_CT=250×(5/300)=250/60≒4.17A"},
+{l:"整定電流（二次側）",f:"I_set=4.17×1.5≒6.25A\n→6A程度に整定"},
+],r:"二次整定電流≒6.25A（実際は6A整定）",e:"I_CT=250/60≒4.17A\nI_set=4.17×1.5≒6.25A",c:"継電器の整定は計算値に最も近い整定タップ値を選びます。"},
+{q:"%Z=5%、基準容量10MVA、定格電圧6.6kVの系統の三相短絡電流を求め、CT比200/5の継電器の短絡時CT二次電流を求めよ。",
+g:"%Z=5%  Pbase=10MVA  Vn=6.6kV  CT比200/5",
+ss:[
+{l:"定格電流",f:"In=10M/(√3×6600)≒875A"},
+{l:"短絡電流",f:"Is=875×(100/5)=17500A=17.5kA"},
+{l:"CT二次電流",f:"I_CT=17500×(5/200)=437.5A"},
+],r:"Is=17.5kA、CT二次電流=437.5A",e:"Is=875×20=17.5kA\nI_CT=17500×5/200=437.5A",c:"短絡時のCT二次電流が継電器の最大入力電流を超えないかの確認も重要です。"},
+{q:"変圧器定格10MVA、変圧比6.6kV/3.3kV、差動継電器のCT比設計と5%不平衡整定電流を求めよ。（CT二次=5A統一）",
+g:"Pn=10MVA  Vp=6.6kV  Vs=3.3kV  CT二次=5A",
+ss:[
+{l:"各側の定格電流",f:"Ip=10M/(√3×6600)≒875A\nIs=10M/(√3×3300)≒1749A"},
+{l:"CT比",f:"一次側: 875/5=175→200/5を選択\n二次側: 1749/5=350→400/5を選択"},
+{l:"5%不平衡整定",f:"整定差動電流=5A×0.05=0.25A"},
+],r:"CT比は200/5と400/5、整定電流≒0.25A",e:"Ip≒875A→CT比200/5\nIs≒1749A→CT比400/5\n差動整定: 0.25A",c:"差動継電器はCT変流比を変圧比に合わせて選定します。"},
+]},
+
+{id:"h03",cat:"hd",freq:2,name:"電力系統の経済運用",
+exp:{
+intro:"複数の発電機で電力を供給するとき、燃料費合計を最小にする出力配分を経済配分といいます。等増分燃料費の原理が基本です。",
+fmls:[
+{l:"燃料費関数",f:"F_i(P_i) = a_i×P_i² + b_i×P_i + c_i  [円/h]"},
+{l:"増分燃料費",f:"λ_i = dF_i/dP_i = 2a_i×P_i + b_i  [円/kWh]"},
+{l:"等増分燃料費の原則",f:"λ₁ = λ₂ = ... = λ（経済運用の条件）"},
+{l:"需給バランス",f:"P₁ + P₂ + ... = P_total（負荷合計）"},
+],
+notes:[
+{t:"n",s:"等増分燃料費の原則は「各発電機の限界費用が等しいとき総費用が最小」という経済学の原理に相当します。"},
+{t:"w",s:"経済配分では各機の出力上下限（P_min〜P_max）の制約も満たす必要があります。上限に達した機は固定してその分を他機で分担します。"},
+],
+steps:[
+{l:"各機の増分燃料費λを求める",b:"λ_i=dF_i/dP_i=2a_i P_i+b_i をP_iの式で表します。",f:"λ_i=2a_iP_i+b_i"},
+{l:"等増分燃料費の条件を立てる",b:"λ₁=λ₂=λとして連立方程式を作ります。",f:""},
+{l:"需給バランスを追加して解く",b:"P₁+P₂=P_totalの条件を加えて連立を解きます。",f:""},
+],
+},
+qs:[
+{q:"2台の発電機A（λA=0.02PA+4）、B（λB=0.04PB+2）で合計負荷P=200MWを経済配分せよ。",
+g:"λA=0.02PA+4  λB=0.04PB+2  PA+PB=200MW",
+ss:[
+{l:"等増分燃料費の条件",f:"λA=λB\n0.02PA+4=0.04PB+2\n0.02PA-0.04PB=-2  …①"},
+{l:"需給バランス",f:"PA+PB=200  …②"},
+{l:"連立を解く",f:"②よりPB=200-PA を①に代入\n0.02PA-0.04(200-PA)=-2\n0.02PA-8+0.04PA=-2\n0.06PA=6\nPA=100MW  PB=100MW"},
+{l:"確認",f:"λA=0.02×100+4=6\nλB=0.04×100+2=6 ✓（等しい）"},
+],r:"PA=100MW、PB=100MW、λ=6円/kWh",e:"λA=λB→0.02PA+4=0.04(200-PA)+2\n0.06PA=6→PA=100MW  PB=100MW",c:"等増分燃料費λが両機とも6円/kWhで一致していることを確認してください。"},
+{q:"前問でPAの最大出力が80MWに制限された場合の経済配分を求めよ。",
+g:"PA_max=80MW  PB無制限  合計200MW",
+ss:[
+{l:"PAを上限に固定",f:"PA=80MW（上限に達するため）"},
+{l:"PBは残りを担当",f:"PB=200-80=120MW"},
+{l:"増分燃料費の確認",f:"λA=0.02×80+4=5.6円/kWh\nλB=0.04×120+2=6.8円/kWh\nλA<λB（制約あり、等しくならない）"},
+],r:"PA=80MW（上限固定）、PB=120MW",e:"PA=80MW（上限）\nPB=200-80=120MW\nλA=5.6<λB=6.8（制約条件のため等しくならない）",c:"上限制約がある場合は等増分燃料費の原則が成立しません。制約機を固定して残りを他機で最適配分します。"},
+{q:"発電機Aの燃料費F_A=0.01PA²+3PA+100[円/h]、PA=150MWのとき増分燃料費と平均燃料費を求めよ。",
+g:"F_A=0.01PA²+3PA+100  PA=150MW",
+ss:[
+{l:"増分燃料費（微分）",f:"λA=dF_A/dPA=0.02×150+3=3+3=6円/kWh"},
+{l:"平均燃料費",f:"FA(150)=0.01×150²+3×150+100\n=0.01×22500+450+100\n=225+450+100=775円/h\n平均=775/150≒5.17円/kWh"},
+],r:"増分燃料費=6円/kWh、平均燃料費≒5.17円/kWh",e:"λA=0.02×150+3=6円/kWh\nF_A=775円/h\n平均=775/150≒5.17円/kWh",c:"増分燃料費（限界費用）と平均燃料費は異なります。経済配分で使うのは増分燃料費です。"},
+]},
+
+{id:"i03",cat:"im",freq:2,name:"誘導電動機のトルク特性と最大トルク",
+exp:{
+intro:"誘導電動機のトルクはすべりsの関数で、比例トルク領域と最大トルク付近の非線形領域があります。最大トルクとその条件が試験で問われます。",
+fmls:[
+{l:"トルク（一般式）",f:"T ∝ r₂×V²/(r₂²/s+(x₁+x₂)²×s)\n（V:端子電圧  r₂:二次抵抗  s:すべり）"},
+{l:"最大トルク条件のすべり",f:"sm = r₂/√(r₁²+(x₁+x₂)²)\n≒ r₂/(x₁+x₂)  （r₁≪の近似）"},
+{l:"最大トルク（近似）",f:"Tmax ≒ V²/(2ωs×(x₁+x₂))\n（Tmaxは二次抵抗r₂に無関係）"},
+{l:"比例推移",f:"r₂を変えてもTmaxは変わらず\nsmが比例移動する"},
+],
+notes:[
+{t:"n",s:"「比例推移」は重要概念です。二次抵抗を大きくするとsm（最大トルク点のすべり）が大きくなる方向に移動しますが、最大トルクの大きさは変わりません。"},
+{t:"w",s:"実用的な運転点はs≪smの比例トルク領域です。この領域ではT≒s（すべりに比例）として扱えます。"},
+],
+steps:[
+{l:"同期角速度ωsを求める",b:"ωs=2π×Ns/60 [rad/s]",f:"ωs=2πNs/60"},
+{l:"トルクを求める",b:"T=P₂/ωsで計算します。P₂は二次入力（ギャップ電力）です。",f:"T=P₂/ωs"},
+{l:"最大トルク条件を確認する",b:"r₁≪の近似が使える場合はsm≒r₂/(x₁+x₂)を使います。",f:"sm≒r₂/(x₁+x₂)"},
+],
+},
+qs:[
+{q:"Ns=1500rpm、P₂=18kWのとき発生トルクを求めよ。",
+g:"Ns=1500rpm  P₂=18kW=18000W",
+ss:[
+{l:"同期角速度",f:"ωs=2π×1500/60=50π≒157.1rad/s"},
+{l:"発生トルク",f:"T=P₂/ωs=18000/157.1≒114.6N·m"},
+],r:"T≒114.6N·m",e:"ωs=50πrad/s\nT=18000/(50π)≒114.6N·m",c:"同期角速度ωsは「同期速度に対応する」角速度です。実回転数ωr=ωs(1-s)ではありません。"},
+{q:"r₂=0.1Ω、x₁+x₂=0.5Ωの誘導電動機の最大トルク発生すべりsmを求めよ。（r₁≪とする）",
+g:"r₂=0.1Ω  x₁+x₂=0.5Ω  r₁≪",
+ss:[
+{l:"smを求める",f:"sm≒r₂/(x₁+x₂)=0.1/0.5=0.2（20%）"},
+],r:"sm=0.2（20%）",e:"sm≒r₂/(x₁+x₂)=0.1/0.5=0.2",c:"sm=0.2は「すべり20%で最大トルクが発生する」ことを意味します。通常の運転点（s=数%）より大きいすべりです。"},
+{q:"前問の電動機で二次抵抗を0.1Ωから0.2Ωに変えた場合（比例推移）、最大トルクはどう変わるか。またsmはどうなるか。",
+g:"r₂:0.1→0.2Ω  x₁+x₂=0.5Ω",
+ss:[
+{l:"新しいsm",f:"sm'≒0.2/0.5=0.4（40%）"},
+{l:"最大トルクの変化",f:"Tmax≒V²/(2ωs(x₁+x₂))\nr₂に無関係→Tmaxは変わらない"},
+],r:"sm=0.2→0.4（2倍に移動）、Tmaxは変わらない",e:"sm'=0.2/0.5=0.4\nTmax変化なし（r₂に無関係）",c:"比例推移の本質です。「二次抵抗を増やすとsm（最大トルク点）が移動するがTmaxは変わらない」"},
+{q:"誘導電動機の端子電圧が定格の80%に低下した場合、最大トルクはどう変わるか。",
+g:"V→0.8V（端子電圧80%に低下）",
+ss:[
+{l:"Tmaxの電圧依存性",f:"Tmax∝V²\n→(0.8V)²/V²=0.64"},
+{l:"最大トルクの変化",f:"Tmax'=0.64×Tmax（64%に低下）"},
+],r:"最大トルクは元の64%に低下",e:"Tmax∝V²\nTmax'=(0.8)²×Tmax=0.64Tmax",c:"最大トルクは電圧の二乗に比例します。電圧が10%低下するとトルクは約19%低下します。"},
+]},
+
+{id:"t04",cat:"tr",freq:2,name:"変圧器の三相結線と特性",
+exp:{
+intro:"三相変圧器の結線方式（Δ-Y、Y-Δなど）によって変圧比・位相変位・零相インピーダンスが変わります。結線と特性の対応が試験のポイントです。",
+fmls:[
+{l:"Y結線の電圧・電流関係",f:"V_線間 = √3 × V_相\nI_線 = I_相"},
+{l:"Δ結線の電圧・電流関係",f:"V_線間 = V_相\nI_線 = √3 × I_相"},
+{l:"Δ-Y変圧器の変圧比",f:"Vp/Vs = np/ns × (1/√3)\n（Y側が√3倍）"},
+{l:"位相変位",f:"Δ-Y（またはY-Δ）結線では30°の位相差が生じる"},
+],
+notes:[
+{t:"n",s:"Y結線は中性点が取り出せるため接地が可能です。Δ結線は第三高調波を閉路内で循環させ外部への影響を抑えます。"},
+{t:"w",s:"Δ-Y変圧器の変圧比は巻数比だけで決まらず√3が絡みます。変圧比の計算で√3を忘れないよう注意してください。"},
+],
+steps:[
+{l:"結線方式を確認する",b:"一次・二次それぞれYかΔかを確認します。",f:""},
+{l:"電圧・電流の変換をする",b:"Y結線: V_線=√3×V_相\nΔ結線: I_線=√3×I_相",f:"Y:V_相=V_線/√3\nΔ:I_相=I_線/√3"},
+{l:"変圧比と位相変位を求める",b:"巻数比に結線の√3を加味して変圧比を計算します。",f:""},
+],
+},
+qs:[
+{q:"巻数比（一次：二次）=1:1のΔ-Y変圧器の電圧変圧比を求めよ。一次線間電圧6.6kVのとき二次線間電圧を求めよ。",
+g:"巻数比np:ns=1:1  結線: Δ-Y  Vp_線間=6.6kV",
+ss:[
+{l:"一次（Δ）の相電圧",f:"Vp_相=Vp_線間=6.6kV（Δ結線）"},
+{l:"二次（Y）の相電圧",f:"Vs_相=Vp_相×(ns/np)=6.6×1=6.6kV"},
+{l:"二次線間電圧",f:"Vs_線間=√3×Vs_相=√3×6.6≒11.4kV"},
+],r:"二次線間電圧≒11.4kV（昇圧比√3倍）",e:"Δ一次: Vp_相=6.6kV\nY二次: Vs_相=6.6kV\nVs_線間=√3×6.6≒11.4kV",c:"Δ-Y変圧器は巻数比1:1でも√3倍の昇圧効果があります。"},
+{q:"巻数比1:2のY-Δ変圧器で一次線間電圧6600V。二次線間電圧と変圧比を求めよ。",
+g:"巻数比np:ns=1:2  結線: Y-Δ  Vp_線間=6600V",
+ss:[
+{l:"一次（Y）の相電圧",f:"Vp_相=6600/√3≒3810V"},
+{l:"二次（Δ）の相電圧",f:"Vs_相=Vp_相×(ns/np)=3810×2=7620V"},
+{l:"二次線間電圧（Δなのでそのまま）",f:"Vs_線間=Vs_相=7620V≒7.62kV"},
+],r:"Vs_線間≒7620V、変圧比=6600:7620≒1:1.155",e:"Vp_相=6600/√3≒3810V\nVs_相=3810×2=7620V\nVs_線間=7620V",c:"Y-Δ変圧器は巻数比2倍でも線間電圧は3810×2=7620Vです。結線方式が変圧比に影響することを確認してください。"},
+{q:"三相変圧器のΔ結線（一次）に第三高調波電圧が発生した場合の影響を説明せよ。",
+g:"Δ結線の一次巻線に第三高調波発生",
+ss:[
+{l:"第三高調波の特徴",f:"三相系の第三高調波は同位相（零相）で各相に発生"},
+{l:"Δ結線での挙動",f:"Δ結線は閉じた回路を形成\n→第三高調波電流がΔ内を循環"},
+{l:"外部への影響",f:"Δ内で循環するため外部（線電流）には現れない\n→外部への影響を遮断"},
+],r:"第三高調波はΔ結線内を循環し外部線電流には現れない",e:"第三高調波（零相）→Δ内で循環電流が流れる\n→外部への影響なし（Δ結線の利点）",c:"Δ結線の第三高調波抑制効果は変圧器の結線選択の重要な理由です。Y-Y結線では第三高調波が外部に出てしまいます。"},
+]},
+]; // end TOPICS
+
+const CATS=[
+  {id:"ps",label:"電力系統"},
+  {id:"hd",label:"発電"},
+  {id:"sg",label:"同期機"},
+  {id:"im",label:"誘導機"},
+  {id:"tr",label:"変圧器"},
+  {id:"ct",label:"制御工学"},
+];
+const FL={3:"★★★ 超頻出",2:"★★ 頻出",1:"★ 出題あり"};
+const ML=["未学習","学習中","習得済"];
+const MC=["#4d5870","#4e9eff","#4ecb71"];
+const FC={3:"#f0c040",2:"#7ec8c8",1:"#4d5870"};
+
+// ── 状態 ────────────────────────────────────────────────────
+let mastery={};
+let curId=null, curDTab='exp', curFilter='all', curScr='home';
+
+// localStorageから読み込み
+try{mastery=JSON.parse(localStorage.getItem('d2c_v3')||'{}')}catch(e){}
+
+function gm(id){return mastery[id]||0}
+function sm(id,v){
+  mastery[id]=v;
+  try{localStorage.setItem('d2c_v3',JSON.stringify(mastery))}catch(e){}
+}
+
+// ── ユーティリティ ───────────────────────────────────────────
+function h(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function nl(str){return (str||'').replace(/\n/g,'<br>')}
+function esc(str){return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+
+// ── 統計更新 ─────────────────────────────────────────────────
+function updStats(){
+  const tot=TOPICS.length;
+  const don=TOPICS.filter(t=>gm(t.id)===2).length;
+  const lrn=TOPICS.filter(t=>gm(t.id)===1).length;
+  const pct=Math.round(don/tot*100);
+  document.getElementById('nav-prog').textContent=don+'/'+tot;
+  const sh=document.getElementById('scr-home');
+  if(!sh)return;
+  const sn=sh.querySelector('#sn-tot');if(sn)sn.textContent=tot;
+  const sl=sh.querySelector('#sn-lrn');if(sl)sl.textContent=lrn;
+  const sd=sh.querySelector('#sn-don');if(sd)sd.textContent=don;
+  const sp=sh.querySelector('#sn-pct');if(sp)sp.textContent=pct+'%';
+  const pt=sh.querySelector('#prog-txt');if(pt)pt.textContent=don+'/'+tot;
+  const pf=sh.querySelector('#prog-fill');if(pf)pf.style.width=pct+'%';
+}
+
+// ── ホーム画面 ───────────────────────────────────────────────
+function renderHome(){
+  let html='';
+  html+=`<div class="stat-grid">
+    <div class="stat-box"><div class="n" id="sn-tot">${TOPICS.length}</div><div class="l">総テーマ数</div></div>
+    <div class="stat-box"><div class="n" id="sn-lrn">0</div><div class="l">学習中</div></div>
+    <div class="stat-box"><div class="n" id="sn-don">0</div><div class="l">習得済み</div></div>
+    <div class="stat-box"><div class="n" id="sn-pct">0%</div><div class="l">習得率</div></div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-row"><span>全体進捗</span><span id="prog-txt">0/${TOPICS.length}</span></div>
+    <div class="pbar-bg"><div class="pbar-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>`;
+  CATS.forEach(cat=>{
+    html+=`<div class="sec-lbl">${cat.label}</div>`;
+    TOPICS.filter(t=>t.cat===cat.id).forEach(t=>{
+      html+=topicRowHTML(t);
+    });
+  });
+  document.getElementById('scr-home').innerHTML=html;
+  updStats();
+}
+
+// ── テーマ一覧 ───────────────────────────────────────────────
+function renderList(){
+  const chips=[['all','全て'],['3','★★★のみ'],...CATS.map(c=>[c.id,c.label])];
+  let html=`<div class="chips">`;
+  chips.forEach(([id,lbl])=>{
+    html+=`<button class="chip ${curFilter===id?'on':''}" onclick="setFilter('${id}')">${lbl}</button>`;
+  });
+  html+=`</div>`;
+  const items=TOPICS.filter(t=>{
+    if(curFilter==='all')return true;
+    if(curFilter==='3')return t.freq===3;
+    return t.cat===curFilter;
+  });
+  items.forEach(t=>{html+=topicRowHTML(t);});
+  document.getElementById('scr-list').innerHTML=html;
+}
+
+function topicRowHTML(t){
+  const m=gm(t.id);
+  const mc=MC[m];
+  return `<div class="t-row" style="--fc:${FC[t.freq]}" onclick="openTopic('${t.id}')">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:${FC[t.freq]}"></div>
+    <div class="t-info">
+      <div class="t-name">${h(t.name)}</div>
+      <div class="t-meta">${FL[t.freq]}</div>
+    </div>
+    <div class="m-pill" style="background:${mc}22;color:${mc}">${ML[m]}</div>
+    <div class="chv">›</div>
+  </div>`;
+}
+
+function setFilter(f){curFilter=f;renderList();}
+
+// ── 詳細画面 ─────────────────────────────────────────────────
+function openTopic(id){
+  curId=id; curDTab='exp';
+  const t=TOPICS.find(x=>x.id===id);
+  document.getElementById('nav-title').textContent=t.name;
+  document.getElementById('nav-back').style.display='block';
+  document.getElementById('dt-exp').className='dtab on';
+  document.getElementById('dt-quiz').className='dtab';
+  document.getElementById('dc-exp').style.display='block';
+  document.getElementById('dc-quiz').style.display='none';
+  renderMbtns(t);
+  renderExp(t);
+  renderQuiz(t);
+  // スクリーン切替
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('scr-detail').classList.add('on');
+  document.getElementById('detail-body').scrollTop=0;
+  // ボトムバー非表示
+  document.getElementById('bot-bar').style.display='none';
+  curScr='detail';
+}
+
+function renderMbtns(t){
+  const m=gm(t.id);
+  let html='';
+  ML.forEach((lbl,i)=>{
+    const active=i===m;
+    html+=`<button class="m-btn" id="mb${i}" onclick="setM(${i})"
+      style="border-color:${active?MC[i]:'var(--border)'};color:${active?MC[i]:'var(--text3)'};background:${active?MC[i]+'22':'var(--bg3)'}">
+      ${lbl}</button>`;
+  });
+  document.getElementById('m-btns').innerHTML=html;
+}
+
+function setM(v){
+  if(!curId)return;
+  sm(curId,v);
+  const t=TOPICS.find(x=>x.id===curId);
+  renderMbtns(t);
+  updStats();
+  renderHome();
+  if(curScr==='list')renderList();
+}
+
+function renderExp(t){
+  const e=t.exp;
+  let html='';
+  // 概要
+  html+=`<div class="e-sec"><div class="e-head">概要</div><div style="font-size:14px;line-height:1.85">${h(e.intro)}</div></div>`;
+  // 公式
+  html+=`<div class="e-sec"><div class="e-head">公式</div>`;
+  (e.fmls||[]).forEach(f=>{
+    html+=`<div class="f-lbl">${h(f.l)}</div><div class="f-box">${h(f.f)}</div>`;
+  });
+  html+=`</div>`;
+  // ポイント
+  (e.notes||[]).forEach(n=>{
+    html+=`<div class="${n.t==='w'?'warn-box':'note-box'}">${h(n.s)}</div>`;
+  });
+  // 解法ステップ
+  if((e.steps||[]).length>0){
+    html+=`<div class="e-sec" style="margin-top:20px"><div class="e-head">解法の流れ（タップで展開）</div>`;
+    e.steps.forEach((s,i)=>{
+      const sid=`stp_${t.id}_${i}`;
+      html+=stepHTML(sid,i+1,s.l||s.label||'',s.b||s.body||'',s.f||s.formula||'');
+    });
+    html+=`</div>`;
+  }
+  document.getElementById('dc-exp').innerHTML=html;
+}
+
+function renderQuiz(t){
+  let html='';
+  (t.qs||[]).forEach((q,i)=>{
+    const aid=`ans_${t.id}_${i}`;
+    html+=`<div class="qcard">
+      <div class="qnum">問 ${i+1} / ${(t.qs||[]).length}</div>
+      <div class="qq">${h(q.q)}</div>
+      <div class="qgiven">${h(q.g)}</div>
+      <button class="ans-btn" onclick="togAns('${aid}',this)">解答・途中式を見る</button>
+      <div class="ans-blk" id="${aid}">
+        <div class="ans-lbl">解答プロセス（タップで展開）</div>`;
+    (q.ss||[]).forEach((s,si)=>{
+      const sid=`qs_${t.id}_${i}_${si}`;
+      html+=stepHTML(sid,si+1,s.l||s.label||'','',(s.f||s.formula||s.fml||''));
+    });
+    html+=`<div class="exam-box">
+        <div class="exam-lbl">本番の答案の書き方</div>
+        <div class="exam-fml">${h(q.e)}</div>
+      </div>
+      <div class="ans-cmt">${h(q.c)}</div>
+    </div></div>`;
+  });
+  document.getElementById('dc-quiz').innerHTML=html;
+}
+
+function stepHTML(sid,num,lbl,body,fml){
+  return `<div class="step" id="${sid}">
+    <div class="step-h" onclick="togStep('${sid}')">
+      <div class="step-num">${num}</div>
+      <div class="step-lbl">${h(lbl)}</div>
+      <div class="step-arr">▼</div>
+    </div>
+    <div class="step-body">
+      ${body?nl(h(body)):''}
+      ${fml?`<span class="sfml">${nl(h(fml))}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function togStep(id){document.getElementById(id).classList.toggle('op')}
+function togAns(id,btn){
+  const el=document.getElementById(id);
+  const op=el.classList.toggle('op');
+  btn.textContent=op?'解答を閉じる':'解答・途中式を見る';
+  if(op){const f=el.querySelector('.step');if(f)f.classList.add('op');}
+}
+
+function switchDTab(tab){
+  curDTab=tab;
+  document.getElementById('dt-exp').className='dtab'+(tab==='exp'?' on':'');
+  document.getElementById('dt-quiz').className='dtab'+(tab==='quiz'?' on':'');
+  document.getElementById('dc-exp').style.display=tab==='exp'?'block':'none';
+  document.getElementById('dc-quiz').style.display=tab==='quiz'?'block':'none';
+  document.getElementById('detail-body').scrollTop=0;
+}
+
+// ── 画面切替 ─────────────────────────────────────────────────
+function showScr(name){
+  curScr=name;
+  curId=null;
+  document.getElementById('nav-title').textContent=name==='home'?'電験二種 計算対策':'テーマ一覧';
+  document.getElementById('nav-back').style.display='none';
+  document.getElementById('bot-bar').style.display='flex';
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('scr-'+name).classList.add('on');
+  document.querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));
+  const bt=document.getElementById('bt-'+name);if(bt)bt.classList.add('on');
+  if(name==='home'){renderHome();}
+  if(name==='list'){renderList();}
+}
+
+function goBack(){showScr(curScr==='detail'?'home':curScr);}
+
+// ── 初期化 ───────────────────────────────────────────────────
+renderHome();
+updStats();
+</script>
+</body>
+</html>
