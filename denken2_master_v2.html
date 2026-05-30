@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>電験二種 電力管理 論説マスター v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2128;
+  --border: #30363d;
+  --accent: #e8a838;
+  --accent2: #58a6ff;
+  --accent3: #3fb950;
+  --danger: #f85149;
+  --purple: #bc8cff;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --text-bright: #f0f6fc;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans JP',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── NAV ── */
+.topnav {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:0;
+  position:sticky; top:0; z-index:200;
+  overflow-x:auto;
+}
+.topnav-brand { padding:12px 20px; font-size:13px; font-weight:700; color:var(--accent); white-space:nowrap; border-right:1px solid var(--border); }
+.mode-btn {
+  padding:14px 18px; font-size:13px; color:var(--text-dim);
+  cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+  transition:all .2s; background:none; border-left:none; border-right:none; border-top:none;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.mode-btn:hover { color:var(--text-bright); }
+.mode-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.nav-right { margin-left:auto; padding:8px 16px; font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; white-space:nowrap; }
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ══════════════════════════════
+   一覧ページ
+══════════════════════════════ */
+.overview { padding:24px; max-width:1100px; margin:0 auto; }
+.overview-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(300px,1fr));
+  gap:14px; margin-top:20px;
+}
+.ov-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:16px 18px; cursor:pointer;
+  transition:all .2s; position:relative; overflow:hidden;
+}
+.ov-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 4px 20px rgba(232,168,56,.15); }
+.ov-card::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+}
+.ov-card.high::before { background:var(--accent); }
+.ov-card.mid::before { background:var(--accent2); }
+.ov-card.low::before { background:var(--accent3); }
+.ov-card.done-card { opacity:.6; }
+.ov-card.done-card::after { content:'✓ 完了'; position:absolute; top:10px; right:12px; font-size:11px; color:var(--accent3); font-weight:700; }
+.ov-num { font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; margin-bottom:6px; }
+.ov-title { font-size:15px; font-weight:700; color:var(--text-bright); margin-bottom:8px; }
+.ov-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.ov-tag { font-size:11px; padding:2px 8px; border-radius:4px; background:var(--surface2); color:var(--text-dim); }
+.ov-freq { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700; }
+.ov-freq.high { background:rgba(232,168,56,.15); color:var(--accent); }
+.ov-freq.mid { background:rgba(88,166,255,.15); color:var(--accent2); }
+.ov-freq.low { background:rgba(63,185,80,.15); color:var(--accent3); }
+
+/* ══════════════════════════════
+   詳細ページ
+══════════════════════════════ */
+.detail { padding:24px; max-width:900px; margin:0 auto; }
+.back-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:6px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--text-dim); font-size:13px;
+  cursor:pointer; margin-bottom:20px; font-family:'Noto Sans JP',sans-serif;
+}
+.back-btn:hover { color:var(--text-bright); border-color:var(--text-dim); }
+
+.detail-header { margin-bottom:24px; }
+.detail-badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:20px; margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+.detail-badge.high { background:rgba(232,168,56,.15); color:var(--accent); border:1px solid rgba(232,168,56,.3); }
+.detail-badge.mid { background:rgba(88,166,255,.15); color:var(--accent2); border:1px solid rgba(88,166,255,.3); }
+.detail-badge.low { background:rgba(63,185,80,.15); color:var(--accent3); border:1px solid rgba(63,185,80,.3); }
+.detail-title { font-size:24px; font-weight:700; color:var(--text-bright); margin-bottom:6px; }
+.detail-meta { font-size:13px; color:var(--text-dim); }
+
+.section-head { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin:24px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+/* 図解ボックス */
+.diagram-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:20px; margin-bottom:16px; overflow-x:auto;
+}
+.diagram-box svg { max-width:100%; display:block; margin:0 auto; }
+
+/* 構造フロー */
+.flow { display:flex; flex-direction:column; gap:4px; }
+.flow-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-size:14px; }
+.flow-num { background:var(--accent); color:#000; font-weight:700; font-size:11px; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.flow-arrow { text-align:center; color:var(--text-dim); font-size:12px; padding:2px 0; }
+
+/* キーワード */
+.kw-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.kw { font-size:12px; padding:5px 12px; border-radius:6px; font-family:'JetBrains Mono',monospace; background:var(--surface); border:1px solid var(--border); color:var(--text); }
+.kw.core { border-color:var(--accent); color:var(--accent); background:rgba(232,168,56,.08); }
+.kw.sub { border-color:var(--accent2); color:var(--accent2); background:rgba(88,166,255,.08); }
+
+/* 記憶術 */
+.memory-box { background:rgba(188,140,255,.08); border:1px solid rgba(188,140,255,.25); border-radius:8px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:var(--purple); }
+.memory-box strong { display:block; margin-bottom:4px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+
+/* 模範答案 */
+.answer-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:0; }
+.ans-tab { padding:8px 16px; font-size:13px; color:var(--text-dim); cursor:pointer; border-bottom:2px solid transparent; background:none; border-left:none; border-right:none; border-top:none; font-family:'Noto Sans JP',sans-serif; }
+.ans-tab.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+.ans-panel { display:none; }
+.ans-panel.active { display:block; }
+.answer-box {
+  background:var(--bg); border:1px solid var(--border); border-top:none;
+  border-radius:0 0 8px 8px; padding:18px; font-size:13px; line-height:2;
+  color:var(--text); white-space:pre-wrap;
+}
+.answer-wrap { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+
+/* 構成テンプレ */
+.template-box { background:var(--surface2); border-left:3px solid var(--accent2); padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; line-height:1.9; margin-bottom:16px; }
+
+/* 完了ボタン */
+.done-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:8px; border:1px solid var(--border); background:var(--surface2); color:var(--text-dim); font-size:14px; cursor:pointer; transition:all .2s; font-family:'Noto Sans JP',sans-serif; margin-top:8px; }
+.done-btn:hover { border-color:var(--accent3); color:var(--accent3); }
+.done-btn.done { border-color:var(--accent3); color:var(--accent3); background:rgba(63,185,80,.1); }
+
+/* ══════════════════════════════
+   フラッシュカードページ
+══════════════════════════════ */
+.flashcard-page { padding:24px; max-width:700px; margin:0 auto; }
+.fc-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+.fc-select { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-size:13px; font-family:'Noto Sans JP',sans-serif; }
+.fc-btn { padding:8px 16px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:13px; cursor:pointer; font-family:'Noto Sans JP',sans-serif; transition:all .15s; }
+.fc-btn:hover { border-color:var(--accent); color:var(--accent); }
+.fc-btn.primary { background:var(--accent); color:#000; border-color:var(--accent); font-weight:700; }
+
+.card-wrap { perspective:1000px; margin-bottom:20px; }
+.fc-card {
+  width:100%; min-height:280px; position:relative;
+  transform-style:preserve-3d; transition:transform .5s ease;
+  cursor:pointer;
+}
+.fc-card.flipped { transform:rotateY(180deg); }
+.fc-face {
+  position:absolute; width:100%; min-height:280px;
+  backface-visibility:hidden; border-radius:12px;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:28px; border:1px solid var(--border);
+}
+.fc-front { background:var(--surface); }
+.fc-back { background:var(--surface2); transform:rotateY(180deg); }
+.fc-label { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:12px; }
+.fc-question { font-size:18px; font-weight:700; color:var(--text-bright); line-height:1.6; }
+.fc-answer { font-size:14px; color:var(--text); line-height:1.9; white-space:pre-wrap; }
+.fc-hint { font-size:12px; color:var(--text-dim); margin-top:16px; }
+.fc-topic { font-size:12px; color:var(--accent); margin-bottom:8px; font-weight:700; }
+
+.fc-result-btns { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+.fc-ok { padding:10px 28px; border-radius:8px; border:none; background:rgba(63,185,80,.2); color:var(--accent3); font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif; }
+.fc-ng { padding:10px 28px; border-radius:8px; border:none; background:rgba(248,81,73,.2); color:var(--danger); font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif; }
+
+.fc-progress-wrap { background:var(--border); border-radius:4px; height:6px; margin-bottom:16px; }
+.fc-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:4px; transition:width .3s; }
+.fc-counter { font-size:12px; color:var(--text-dim); text-align:center; margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
+
+.fc-done-screen { text-align:center; padding:40px 20px; }
+.fc-done-screen h2 { font-size:24px; color:var(--accent); margin-bottom:12px; }
+.fc-score { font-size:48px; font-weight:700; color:var(--text-bright); margin:16px 0; font-family:'JetBrains Mono',monospace; }
+.fc-score span { font-size:20px; color:var(--text-dim); }
+
+/* ══════════════════════════════
+   進捗ページ
+══════════════════════════════ */
+.progress-page { padding:24px; max-width:800px; margin:0 auto; }
+.prog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-top:16px; }
+.prog-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px 16px; }
+.prog-item-title { font-size:13px; font-weight:500; color:var(--text-bright); margin-bottom:8px; }
+.prog-bar-bg { background:var(--border); border-radius:4px; height:6px; }
+.prog-bar-fill { height:100%; border-radius:4px; background:var(--accent3); transition:width .4s; }
+.prog-pct { font-size:11px; color:var(--text-dim); margin-top:4px; font-family:'JetBrains Mono',monospace; }
+
+.stat-row { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:24px; }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px 20px; flex:1; min-width:120px; }
+.stat-num { font-size:32px; font-weight:700; color:var(--accent); font-family:'JetBrains Mono',monospace; }
+.stat-label { font-size:12px; color:var(--text-dim); margin-top:4px; }
+
+/* ── UTILITIES ── */
+.notice { background:rgba(88,166,255,.08); border:1px solid rgba(88,166,255,.2); border-radius:6px; padding:12px 16px; font-size:13px; color:var(--accent2); margin-bottom:20px; line-height:1.7; }
+
+@media(max-width:640px){
+  .overview-grid { grid-template-columns:1fr; }
+  .detail,.overview,.flashcard-page,.progress-page { padding:16px; }
+  .fc-question { font-size:15px; }
+}
+
+/* ── TOAST ── */
+#toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#161b22; border:1px solid var(--accent3); color:var(--accent3);
+  padding:10px 20px; border-radius:8px; font-size:13px;
+  opacity:0; transition:all .25s; z-index:999; white-space:nowrap; pointer-events:none;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── RESET BTN ── */
+.reset-btn {
+  padding:6px 14px; border-radius:6px; border:1px solid var(--danger);
+  background:rgba(248,81,73,.1); color:var(--danger); font-size:12px;
+  cursor:pointer; font-family:'Noto Sans JP',sans-serif;
+  transition:all .15s; white-space:nowrap;
+}
+.reset-btn:hover { background:rgba(248,81,73,.2); }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-brand">⚡ 電験二種 論説マスター</div>
+  <button class="mode-btn active" onclick="showPage('overview')">一覧</button>
+  <button class="mode-btn" onclick="showPage('flashcard')">フラッシュカード</button>
+  <button class="mode-btn" onclick="showPage('progress')">進捗</button>
+  <div class="nav-right" style="display:flex;align-items:center;gap:12px">
+    <span id="navProgress">0/28 完了</span>
+    <button class="reset-btn" onclick="resetAllState()">リセット</button>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<!-- ══ 一覧ページ ══ -->
+<div class="page active" id="page-overview">
+  <div class="overview">
+    <div class="notice">電力管理 6問中4問選択。論説は最大2問。★★★を3テーマ完璧にすれば安全圏の土台が作れます。</div>
+    <div class="overview-grid" id="ov-grid"></div>
+  </div>
+</div>
+
+<!-- ══ 詳細ページ ══ -->
+<div class="page" id="page-detail">
+  <div class="detail" id="detail-content"></div>
+</div>
+
+<!-- ══ フラッシュカードページ ══ -->
+<div class="page" id="page-flashcard">
+  <div class="flashcard-page">
+    <div class="fc-controls">
+      <select class="fc-select" id="fc-filter">
+        <option value="all">全テーマ（84枚）</option>
+        <option value="high">★★★ 超頻出のみ</option>
+        <option value="mid">★★ 頻出のみ</option>
+        <option value="wrong">苦手問題のみ</option>
+      </select>
+      <button class="fc-btn primary" onclick="startFlash()">▶ スタート</button>
+      <button class="fc-btn" onclick="shuffleFlash()">シャッフル</button>
+    </div>
+
+    <div id="fc-session" style="display:none">
+      <div class="fc-progress-wrap"><div class="fc-progress-fill" id="fc-prog"></div></div>
+      <div class="fc-counter" id="fc-counter"></div>
+      <div class="card-wrap">
+        <div class="fc-card" id="fc-card" onclick="flipCard()">
+          <div class="fc-face fc-front">
+            <div class="fc-topic" id="fc-topic"></div>
+            <div class="fc-label">問題</div>
+            <div class="fc-question" id="fc-q"></div>
+            <div class="fc-hint">タップして答えを確認</div>
+          </div>
+          <div class="fc-face fc-back">
+            <div class="fc-label">ポイント答案</div>
+            <div class="fc-answer" id="fc-a"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-result-btns" id="fc-result" style="display:none">
+        <button class="fc-ng" onclick="markCard(false)">✗ もう一度</button>
+        <button class="fc-ok" onclick="markCard(true)">○ 覚えた</button>
+      </div>
+    </div>
+
+    <div id="fc-done" style="display:none" class="fc-done-screen">
+      <h2>セッション完了</h2>
+      <div class="fc-score"><span id="fc-ok-count">0</span><span> / </span><span id="fc-total-count">0</span></div>
+      <div style="color:var(--text-dim);font-size:13px;margin-bottom:24px">正解</div>
+      <button class="fc-btn primary" onclick="startFlash()">もう一度</button>
+      <button class="fc-btn" style="margin-left:8px" onclick="showPage('overview')">一覧へ</button>
+    </div>
+
+    <div id="fc-ready">
+      <div style="text-align:center;padding:40px 0;color:var(--text-dim)">フィルターを選んで「スタート」を押してください</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 進捗ページ ══ -->
+<div class="page" id="page-progress">
+  <div class="progress-page">
+    <div class="stat-row" id="stat-row"></div>
+    <div class="section-head" style="margin-top:0">テーマ別習熟度</div>
+    <div class="prog-grid" id="prog-grid"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+const topics = [
+  {
+    id:'t1', freq:'high', cat:'発変電',
+    title:'火力発電の熱効率向上',
+    tags:['発変電','超頻出','毎年出題'],
+    memory:'「蒸気→再熱→コンバイン」の3段ロケットで覚える',
+    diagram:`<svg viewBox="0 0 500 160" width="500" height="160" style="font-family:sans-serif">
+      <rect x="10" y="60" width="100" height="50" rx="6" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="60" y="82" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">高温高圧化</text>
+      <text x="60" y="98" text-anchor="middle" fill="#c9d1d9" font-size="10">超臨界圧</text>
+      <text x="60" y="112" text-anchor="middle" fill="#8b949e" font-size="10">熱効率45%</text>
+      <path d="M112 85 L148 85" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
+      <rect x="150" y="60" width="100" height="50" rx="6" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="200" y="82" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">再熱・再生</text>
+      <text x="200" y="98" text-anchor="middle" fill="#c9d1d9" font-size="10">サイクル改善</text>
+      <text x="200" y="112" text-anchor="middle" fill="#8b949e" font-size="10">湿り度↓効率↑</text>
+      <path d="M252 85 L288 85" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <rect x="290" y="60" width="110" height="50" rx="6" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="345" y="82" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">コンバインド</text>
+      <text x="345" y="98" text-anchor="middle" fill="#c9d1d9" font-size="10">排熱二重利用</text>
+      <text x="345" y="112" text-anchor="middle" fill="#8b949e" font-size="10">熱効率60%</text>
+      <text x="420" y="72" fill="#f85149" font-size="22" font-weight="bold">🔥</text>
+      <text x="420" y="100" fill="#8b949e" font-size="10">燃料</text>
+      <text x="250" y="30" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">熱効率向上の3段階</text>
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#58a6ff"/></marker>
+        <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3fb950"/></marker>
+      </defs>
+    </svg>`,
+    flow:[
+      {num:'①',text:'蒸気条件の高温高圧化（超臨界圧・超々臨界圧）：熱効率 40〜45% へ'},
+      {num:'②',text:'再熱・再生サイクル採用：再加熱で湿り度を下げ、抽気で給水予熱 → 熱損失を減らす'},
+      {num:'③',text:'コンバインドサイクル：ガスタービン排ガスで蒸気発生 → 熱効率 50〜60% へ'},
+      {num:'④',text:'補機損失低減：送風機・給水ポンプのインバータ制御'},
+    ],
+    keywords:[
+      {word:'熱効率',core:true},{word:'超臨界圧',core:true},{word:'再熱サイクル',core:true},
+      {word:'再生サイクル',core:true},{word:'コンバインドサイクル',core:true},
+      {word:'蒸気条件',sub:true},{word:'排熱回収',sub:true},{word:'補機損失',sub:true},{word:'CO₂削減',sub:true}
+    ],
+    template:'①熱効率の定義 → ②向上の原理（蒸気条件・サイクル・排熱の3軸） → ③各方策を列挙＋仕組みと効果 → ④環境・経済的意義で締め',
+    answers:[
+      {label:'標準問題',q:'火力発電所の熱効率向上策について述べよ',
+       a:`火力発電所の熱効率は「発生電力量÷投入熱量」で定義され、向上策は主に以下の3方向から構成される。
+
+（1）蒸気条件の高温高圧化
+蒸気温度・圧力を高めるほどタービンの仕事量が増加する。超臨界圧（22.1MPa超）や超々臨界圧の採用により熱効率は40〜45%程度に向上する。
+
+（2）再熱・再生サイクルの採用
+再熱サイクルでは高圧タービンで膨張した蒸気を再加熱して湿り度を下げつつ仕事量を増加させる。再生サイクルでは抽気蒸気で給水を予熱することでボイラでの加熱熱量を減らし効率を向上させる。
+
+（3）コンバインドサイクルの採用
+ガスタービン排ガスの熱を排熱回収ボイラで回収し蒸気タービンを駆動することで、熱効率を50〜60%程度まで高めることができる。
+
+（4）補機損失の低減
+送風機・給水ポンプ等の補機動力をインバータ制御で最適化することも有効である。`
+      },
+      {label:'応用（熱サイクル比較）',q:'ランキンサイクルと再熱サイクルの違いを説明し、改善効果を述べよ',
+       a:`ランキンサイクルは、ボイラ→タービン→復水器→給水ポンプの4工程からなる基本サイクルである。タービン膨張後半で湿り度が増加し効率低下と翼侵食が生じる問題がある。
+
+再熱サイクルはこれを改善したものである。高圧タービンで膨張した蒸気を一旦取り出し、再熱器で再加熱したうえで低圧タービンに導く。これにより：
+・湿り度の増加を抑制しタービン効率を向上させる
+・低圧タービン翼の侵食（エロージョン）を防止する
+・同じボイラ圧力でより多くの仕事が得られる
+
+実際の大容量火力発電所では再熱サイクルと再生サイクルを組み合わせた再熱再生サイクルが標準的に採用されている。`
+      },
+      {label:'コンバインド詳述',q:'コンバインドサイクル発電の構成と利点を述べよ',
+       a:`コンバインドサイクル発電は、ガスタービンと蒸気タービンを組み合わせて二段階で発電する方式である。
+
+（1）構成
+まず燃料を燃焼させてガスタービンを駆動し発電する。次にガスタービンの高温排ガス（500〜600℃）を排熱回収ボイラ（HRSG）に導いて蒸気を発生させ、蒸気タービンを駆動して再度発電する。
+
+（2）利点
+・熱効率が高い：排ガスの熱を二重に利用するため、総合熱効率は50〜60%に達する。最新のものでは63%程度のものもある。
+・起動停止が速い：負荷追従性に優れ、需要変動への対応や再生可能エネルギーのバックアップに適する。
+・環境性に優れる：天然ガスを燃料とすることが多く、CO₂・NOx・SOxの排出が石炭火力より少ない。
+
+（3）運用上の特徴
+部分負荷でも効率低下が比較的小さく、ピーク・ミドル電源として柔軟に運用できる。`
+      },
+      {label:'環境対策視点',q:'火力発電所における環境保全対策を述べよ',
+       a:`火力発電所の主な環境保全対策を以下に述べる。
+
+（1）大気汚染対策
+・SOx（硫黄酸化物）：排煙脱硫装置により除去する。石灰石膏法が代表的である。
+・NOx（窒素酸化物）：燃焼方法の改善（低NOxバーナ・二段燃焼）と排煙脱硝装置（アンモニア接触還元法）により低減する。
+・ばいじん：電気集じん器により除去する。
+
+（2）温暖化対策（CO₂削減）
+熱効率の向上（超々臨界圧・コンバインドサイクル）が最も基本的な対策である。燃料転換（石炭から天然ガスへ）やバイオマス混焼も有効である。
+
+（3）温排水対策
+復水器の冷却に用いた温排水は放水温度・拡散範囲を管理し、周辺海域への影響を抑制する。`
+      }
+    ],
+    flashcards:[
+      {q:'火力発電の熱効率向上の3つのアプローチを述べよ',a:'①蒸気条件の高温高圧化（超臨界圧）\n②再熱・再生サイクルの採用\n③コンバインドサイクルによる排熱二重利用'},
+      {q:'再熱サイクルと再生サイクルの違いを一行で説明せよ',a:'再熱＝膨張途中の蒸気を再加熱して湿り度を下げる\n再生＝抽気蒸気で給水を予熱して加熱熱量を減らす'},
+      {q:'コンバインドサイクルの熱効率はどの程度か',a:'50〜60%程度（従来の蒸気タービン単独の40〜45%より大幅に向上）'},
+      {q:'コンバインドサイクルの排熱回収ボイラの役割は？',a:'ガスタービンの高温排ガス（500〜600℃）の熱を回収して蒸気を発生させ、蒸気タービンを駆動する'},
+      {q:'火力発電のSOx・NOx対策をそれぞれ述べよ',a:'SOx：排煙脱硫装置（石灰石膏法）\nNOx：低NOxバーナ・二段燃焼＋排煙脱硝装置（アンモニア接触還元法）'},
+    ]
+  },
+  {
+    id:'t2', freq:'high', cat:'発変電',
+    title:'変圧器の損失と効率',
+    tags:['発変電','超頻出','計算混合'],
+    memory:'「鉄は一定、銅は電流²」― 最大効率は両者が等しいとき',
+    diagram:`<svg viewBox="0 0 480 160" width="480" height="160" style="font-family:sans-serif">
+      <rect x="10" y="40" width="140" height="90" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="80" y="65" text-anchor="middle" fill="#e8a838" font-size="12" font-weight="bold">無負荷損（鉄損）</text>
+      <text x="80" y="85" text-anchor="middle" fill="#c9d1d9" font-size="11">ヒステリシス損</text>
+      <text x="80" y="102" text-anchor="middle" fill="#c9d1d9" font-size="11">渦電流損</text>
+      <text x="80" y="120" text-anchor="middle" fill="#8b949e" font-size="10">負荷に無関係・常時発生</text>
+      <rect x="170" y="40" width="140" height="90" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="240" y="65" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="bold">負荷損（銅損）</text>
+      <text x="240" y="85" text-anchor="middle" fill="#c9d1d9" font-size="11">巻線抵抗 × I²</text>
+      <text x="240" y="102" text-anchor="middle" fill="#c9d1d9" font-size="11">電流の2乗に比例</text>
+      <text x="240" y="120" text-anchor="middle" fill="#8b949e" font-size="10">負荷変動で変化</text>
+      <rect x="330" y="40" width="140" height="90" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="400" y="65" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="bold">最大効率条件</text>
+      <text x="400" y="85" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">鉄損 ＝ 銅損</text>
+      <text x="400" y="105" text-anchor="middle" fill="#c9d1d9" font-size="10">のとき最大効率</text>
+      <text x="400" y="120" text-anchor="middle" fill="#8b949e" font-size="10">全日効率で設計</text>
+      <text x="240" y="22" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">変圧器損失の構造</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'無負荷損（鉄損）= ヒステリシス損 ＋ 渦電流損。負荷の大小に関係なく常時発生'},
+      {num:'②',text:'負荷損（銅損）= I²R。負荷電流の2乗に比例して変動する'},
+      {num:'③',text:'最大効率条件：無負荷損＝負荷損 のとき（これが最頻出ポイント）'},
+      {num:'④',text:'低減策：珪素鋼板・アモルファス鉄心（鉄損）／導体拡大・低抵抗材（銅損）'},
+    ],
+    keywords:[
+      {word:'鉄損（無負荷損）',core:true},{word:'銅損（負荷損）',core:true},
+      {word:'ヒステリシス損',core:true},{word:'渦電流損',core:true},{word:'最大効率条件',core:true},
+      {word:'アモルファス鉄心',sub:true},{word:'珪素鋼板',sub:true},{word:'全日効率',sub:true}
+    ],
+    template:'①損失の2分類（鉄損・銅損）を定義 → ②各損失の発生原因と特性 → ③最大効率条件（鉄損＝銅損）を明記 → ④低減対策を列挙',
+    answers:[
+      {label:'標準問題',q:'変圧器の損失を分類し、効率向上策を述べよ',
+       a:`変圧器の損失は無負荷損と負荷損に大別される。
+
+（1）無負荷損（鉄損）
+鉄心中の磁束変化により生じる損失で、ヒステリシス損と渦電流損の和である。負荷の大小にかかわらず常時発生するため、軽負荷時の効率低下の主因となる。
+低減策：方向性珪素鋼板やアモルファス鉄心の採用。
+
+（2）負荷損（銅損）
+巻線の抵抗による損失で、負荷電流の2乗に比例する。
+低減策：導体断面積の拡大や低抵抗材料の採用。
+
+（3）最大効率条件
+変圧器の効率は無負荷損と負荷損が等しくなる負荷率のとき最大となる。需要パターンに合わせて最大効率点を設計することが全日効率の向上につながる。`
+      },
+      {label:'並行運転',q:'変圧器を並行運転するための条件を述べよ',
+       a:`変圧器を並行運転するためには以下の条件を満たす必要がある。
+
+（1）極性が一致していること
+極性が逆だと大きな循環電流が流れ巻線を焼損する。最も重要な条件である。
+
+（2）変圧比（定格電圧）が等しいこと
+変圧比が異なると無負荷時にも循環電流が流れ損失が増加する。
+
+（3）パーセントインピーダンスが等しいこと
+%インピーダンスが等しいと負荷が容量に比例して分担される。異なると分担が偏り、一方が過負荷になる。
+
+（4）抵抗とリアクタンスの比が等しいこと
+力率が揃い、無効循環電流を防ぐ。
+
+三相変圧器の場合はさらに、相回転（相順）が一致し、角変位（結線による位相差）が等しいことが必要である。`
+      },
+      {label:'冷却・保護',q:'変圧器の冷却方式と保護装置について述べよ',
+       a:`（1）冷却方式
+変圧器は損失により発熱するため、容量に応じた冷却が必要である。
+・乾式：自然空冷。小容量用。
+・油入自冷（ONAN）：絶縁油の自然対流で冷却。配電用に広く使用。
+・油入風冷（ONAF）：送風機を併用。
+・送油風冷（OFAF）：ポンプで油を循環させ送風機で冷却。大容量用。
+
+（2）主な保護装置
+・ブッフホルツ継電器：内部故障時に発生するガスや油流を検出して動作する。
+・比率差動継電器：変圧器の一次・二次電流の差から内部故障を検出する。
+・温度継電器：油温・巻線温度を監視する。
+・圧力継電器：内部圧力上昇を検出する。`
+      }
+    ],
+    flashcards:[
+      {q:'変圧器の損失を2種類に分けてそれぞれの特徴を述べよ',a:'鉄損（無負荷損）：負荷に無関係で常時発生。ヒステリシス損＋渦電流損\n銅損（負荷損）：電流の2乗に比例して変動'},
+      {q:'変圧器が最大効率になる条件は？',a:'無負荷損（鉄損）＝ 負荷損（銅損） のとき'},
+      {q:'鉄損の低減に有効な材料を2つ挙げよ',a:'①方向性珪素鋼板　②アモルファス鉄心'},
+      {q:'変圧器の並行運転で最も重要な条件は？',a:'極性が一致していること（逆だと大循環電流で焼損する）。次いで変圧比と%インピーダンスの一致'},
+      {q:'ブッフホルツ継電器とは何を検出するか',a:'変圧器内部の故障時に発生するガスや油の流動を検出して動作する保護継電器'},
+    ]
+  },
+  {
+    id:'t3', freq:'high', cat:'送配電',
+    title:'電力系統の安定度',
+    tags:['送配電','超頻出','等面積法'],
+    memory:'「定態は日常、過渡は事故後、動態はAVR込み」― 3種類の頭文字で「定・過・動」',
+    diagram:`<svg viewBox="0 0 500 160" width="500" height="160" style="font-family:sans-serif">
+      <rect x="5" y="40" width="140" height="100" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="75" y="65" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">定態安定度</text>
+      <text x="75" y="82" text-anchor="middle" fill="#c9d1d9" font-size="10">微小変動への</text>
+      <text x="75" y="96" text-anchor="middle" fill="#c9d1d9" font-size="10">抵抗力</text>
+      <text x="75" y="113" text-anchor="middle" fill="#8b949e" font-size="10">P=EV/X・sinδ</text>
+      <text x="75" y="128" text-anchor="middle" fill="#8b949e" font-size="10">日常運転時</text>
+      <rect x="178" y="40" width="140" height="100" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="248" y="65" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">過渡安定度</text>
+      <text x="248" y="82" text-anchor="middle" fill="#c9d1d9" font-size="10">大擾乱後の</text>
+      <text x="248" y="96" text-anchor="middle" fill="#c9d1d9" font-size="10">同期維持能力</text>
+      <text x="248" y="113" text-anchor="middle" fill="#8b949e" font-size="10">等面積法で判定</text>
+      <text x="248" y="128" text-anchor="middle" fill="#8b949e" font-size="10">短絡・地絡事故後</text>
+      <rect x="351" y="40" width="140" height="100" rx="8" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="421" y="65" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="bold">動態安定度</text>
+      <text x="421" y="82" text-anchor="middle" fill="#c9d1d9" font-size="10">制御系込みの</text>
+      <text x="421" y="96" text-anchor="middle" fill="#c9d1d9" font-size="10">長時間安定性</text>
+      <text x="421" y="113" text-anchor="middle" fill="#8b949e" font-size="10">AVR・PSS含む</text>
+      <text x="421" y="128" text-anchor="middle" fill="#8b949e" font-size="10">比較的長い時間域</text>
+      <text x="250" y="22" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">安定度の3分類</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'定態安定度：日常の微小変動に対する耐性。P＝EV/X×sinδ が基本式。相差角δを小さく保つ'},
+      {num:'②',text:'過渡安定度：短絡・地絡等の大擾乱後に同期を保てるか。等面積法で判定。高速遮断が鍵'},
+      {num:'③',text:'動態安定度：AVR・PSS等の制御系を含む長時間の安定性'},
+      {num:'④',text:'向上策：多回線化・直列コンデンサ（X低減）／高速遮断器・距離継電器（故障除去）／AVR・PSS高応答化'},
+    ],
+    keywords:[
+      {word:'定態安定度',core:true},{word:'過渡安定度',core:true},{word:'相差角δ',core:true},
+      {word:'等面積法',core:true},{word:'高速遮断',core:true},
+      {word:'AVR',sub:true},{word:'PSS',sub:true},{word:'直列コンデンサ',sub:true},{word:'多回線化',sub:true}
+    ],
+    template:'①安定度の定義（3種を列挙） → ②各種の詳細と判定法 → ③向上策（リアクタンス低減・高速遮断・制御系）',
+    answers:[
+      {label:'標準問題',q:'電力系統の安定度の種類と向上策を述べよ',
+       a:`電力系統の安定度は以下の3種に分類される。
+
+（1）定態安定度
+定常運転状態で微小な擾乱が加わった際に同期運転を維持できる能力。送電電力P＝EV/X×sinδ で表され、相差角δが小さく、リアクタンスXが小さいほど余裕が大きい。
+
+（2）過渡安定度
+地絡・短絡事故など大きな擾乱発生後に同期を保てる能力。等面積法により安定判別が行われ、故障の継続時間が長いほど不安定になる。
+
+（3）動態安定度
+AVRやPSSなどの制御系を含めた比較的長い時間域での安定性。
+
+向上策：
+・送電線の多回線化または直列コンデンサ挿入によるリアクタンス低減
+・高速遮断器と距離継電器による故障の迅速除去
+・高応答AVRおよびPSSの採用による制動力強化
+・系統連系強化による系統剛性の向上`
+      },
+      {label:'等面積法の説明',q:'等面積法による過渡安定度の判定原理を述べよ',
+       a:`等面積法は、一機無限大母線系統において過渡安定度を判定する図式的手法である。
+
+（1）原理
+発電機の出力電力と機械入力の差が回転子の加速・減速を生む。相差角δに対する電力曲線を描き、故障発生から除去までに回転子が得る「加速エネルギー（加速面積）」と、故障除去後に系統へ吐き出す「減速エネルギー（減速面積）」を比較する。
+
+（2）判定基準
+減速可能な面積（最大減速面積）が加速面積以上であれば、回転子は同期を回復でき安定と判定される。加速面積が最大減速面積を上回ると同期を失い不安定となる。
+
+（3）臨界故障除去時間
+安定を保てる限界の故障除去時間を臨界故障除去時間という。故障を迅速に除去するほど加速面積が小さくなり安定度が向上する。高速遮断が重要とされる理由である。`
+      },
+      {label:'周波数安定',q:'電力系統の周波数変動の原因と維持対策を述べよ',
+       a:`（1）周波数変動の原因
+系統周波数は発電電力と需要電力のバランスで決まる。発電＞需要なら周波数は上昇し、発電＜需要なら低下する。需要の急変、発電機の脱落、再生可能エネルギーの出力変動などが変動要因となる。
+
+（2）周波数維持対策
+・ガバナフリー運転：発電機の調速機が周波数偏差に応じて出力を自動調整する（一次調整）。
+・負荷周波数制御（LFC）：中央給電指令所からの信号で発電機出力を調整する（二次調整）。
+・経済負荷配分制御（EDC）：燃料費が最小となるよう発電機間の出力配分を決める。
+・調整力の確保：揚水発電・蓄電池などの調整電源を待機させる。
+
+（3）再エネ時代の課題
+慣性力を持たないインバータ電源の増加により系統の慣性が低下し、周波数変動が大きくなりやすい。蓄電池による疑似慣性付与などの対策が検討されている。`
+      }
+    ],
+    flashcards:[
+      {q:'電力系統安定度の3種類を挙げよ',a:'①定態安定度（微小変動・日常）\n②過渡安定度（大擾乱・事故後）\n③動態安定度（制御系込み・長時間）'},
+      {q:'過渡安定度の判定法は？',a:'等面積法（加速面積＜減速面積なら安定）'},
+      {q:'安定度向上策を3つ挙げよ',a:'①多回線化・直列コンデンサでX低減\n②高速遮断器・距離継電器で故障を素早く除去\n③高応答AVR・PSSで制動力を強化'},
+      {q:'臨界故障除去時間とは何か',a:'過渡安定を保てる限界の故障除去時間。これより遅く遮断すると同期を失う。高速遮断が重要な理由'},
+      {q:'系統周波数が変動する根本原因は？',a:'発電電力と需要電力のアンバランス。発電＞需要で上昇、発電＜需要で低下する'},
+    ]
+  },
+  {
+    id:'t4', freq:'high', cat:'送配電',
+    title:'地絡・短絡保護継電',
+    tags:['送配電','超頻出','継電器'],
+    memory:'「OCRは電流、DGRは方向、距離は範囲」― 三者の役割の違いを一行で',
+    diagram:`<svg viewBox="0 0 500 160" width="500" height="160" style="font-family:sans-serif">
+      <rect x="5" y="45" width="115" height="80" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="62" y="72" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">OCR</text>
+      <text x="62" y="88" text-anchor="middle" fill="#c9d1d9" font-size="10">過電流検出</text>
+      <text x="62" y="104" text-anchor="middle" fill="#8b949e" font-size="10">定限時・反限時</text>
+      <text x="62" y="118" text-anchor="middle" fill="#8b949e" font-size="10">短絡保護</text>
+      <rect x="135" y="45" width="115" height="80" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="192" y="72" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">DGR</text>
+      <text x="192" y="88" text-anchor="middle" fill="#c9d1d9" font-size="10">地絡方向判定</text>
+      <text x="192" y="104" text-anchor="middle" fill="#8b949e" font-size="10">零相電圧・電流</text>
+      <text x="192" y="118" text-anchor="middle" fill="#8b949e" font-size="10">の位相関係</text>
+      <rect x="265" y="45" width="115" height="80" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="322" y="72" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">距離継電器</text>
+      <text x="322" y="88" text-anchor="middle" fill="#c9d1d9" font-size="10">インピーダンス</text>
+      <text x="322" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">で動作範囲設定</text>
+      <text x="322" y="118" text-anchor="middle" fill="#8b949e" font-size="10">系統保護の主体</text>
+      <rect x="395" y="45" width="100" height="80" rx="8" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="445" y="72" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="bold">保護協調</text>
+      <text x="445" y="88" text-anchor="middle" fill="#c9d1d9" font-size="10">主保護＋</text>
+      <text x="445" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">後備保護</text>
+      <text x="445" y="118" text-anchor="middle" fill="#8b949e" font-size="10">時限で整合</text>
+      <text x="250" y="25" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">保護継電方式の体系</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'過電流継電器（OCR）：短絡電流を検出。定限時（一定時間後動作）と反限時（電流大→早く動作）の2特性'},
+      {num:'②',text:'地絡方向継電器（DGR）：零相電圧と零相電流の位相関係で地絡方向を判定。自回線のみに選択動作'},
+      {num:'③',text:'距離継電器：故障点までのインピーダンスで動作範囲を決定。系統保護の主体'},
+      {num:'④',text:'保護協調：主保護と後備保護を時限差で整合。故障範囲を最小化する設計'},
+    ],
+    keywords:[
+      {word:'OCR（過電流継電器）',core:true},{word:'DGR（地絡方向継電器）',core:true},
+      {word:'距離継電器',core:true},{word:'零相電流',core:true},{word:'保護協調',core:true},
+      {word:'反限時特性',sub:true},{word:'定限時特性',sub:true},{word:'主保護・後備保護',sub:true}
+    ],
+    template:'①保護の目的・基本方針 → ②各継電器の原理と用途を列挙 → ③保護協調の考え方（主保護・後備保護・時限）',
+    answers:[
+      {label:'標準問題',q:'配電系統における地絡保護の方式を述べよ',
+       a:`配電系統における地絡保護の主な方式を以下に述べる。
+
+（1）地絡方向継電器（DGR）方式
+零相電圧と零相電流の位相関係から地絡の発生方向を判定し、自回線の地絡のみに選択的に動作する。非接地系統において広く採用される。
+
+（2）地絡過電圧継電器（OVGR）との組合せ
+DGRとOVGR（零相電圧検出）を組み合わせることで、誤動作を防止しつつ確実な地絡検出が可能となる。
+
+（3）保護協調
+主保護と後備保護の動作時限を整合させ、故障範囲を最小化するよう協調設計を行う。定限時・反限時特性を活用して上位・下位機器間の協調をとる。
+
+（4）高抵抗接地系への対応
+高抵抗接地系では地絡電流が微小なため、高感度継電器と組み合わせた保護設計が必要となる。`
+      },
+      {label:'保護協調の詳述',q:'配電系統における保護協調の考え方を述べよ',
+       a:`保護協調とは、事故時に故障区間のみを最小範囲で切り離し、健全区間への波及を防ぐよう保護装置の動作を整合させることをいう。
+
+（1）時限協調
+上位（電源側）の継電器ほど動作時限を長く、下位（負荷側）ほど短く設定する。これにより事故点に最も近い下位の遮断器が先に動作し、上位は後備保護として待機する。
+
+（2）電流協調
+反限時特性を利用し、事故電流が大きいほど早く動作させる。下位区間の短絡電流に対して下位継電器が先行動作するよう整定する。
+
+（3）後備保護
+主保護が動作しなかった場合に備え、上位の継電器が一定時限後に動作して確実に事故を除去する。
+
+（4）方向協調
+ループ系統や並行2回線では方向継電器を用い、事故方向に応じて選択的に動作させる。
+
+協調設計では、これらを継電器の動作時限特性曲線（協調曲線）上で検討する。`
+      },
+      {label:'継電器の種類',q:'保護継電器を機能別に分類して説明せよ',
+       a:`保護継電器は検出する量や機能により以下のように分類される。
+
+（1）過電流継電器（OCR）
+電流が整定値を超えると動作する。短絡保護の基本。定限時・反限時特性がある。
+
+（2）地絡方向継電器（DGR）
+零相電圧と零相電流の位相関係から地絡方向を判定する。
+
+（3）差動継電器（比率差動継電器）
+保護区間の流入電流と流出電流の差を検出する。変圧器・母線・発電機の内部故障保護に用いる。
+
+（4）距離継電器
+電圧と電流の比（インピーダンス）から故障点までの距離を判定し、整定範囲内の故障で動作する。送電線保護の主体。
+
+（5）方向継電器
+電力または電流の方向を判定し、事故方向に応じて選択的に動作する。
+
+これらを組み合わせ、主保護と後備保護を構成して系統全体の保護を実現する。`
+      }
+    ],
+    flashcards:[
+      {q:'DGR（地絡方向継電器）の動作原理を述べよ',a:'零相電圧と零相電流の位相関係から地絡の方向を判定し、自回線の地絡のみに選択動作する'},
+      {q:'OCRの定限時と反限時の違いを述べよ',a:'定限時：電流値に関わらず設定時間後に動作\n反限時：電流が大きいほど短時間で動作（故障電流の大きさに比例して感度が上がる）'},
+      {q:'保護協調とは何か',a:'主保護と後備保護の動作時限に差をつけ、最小範囲の設備だけを切り離せるよう設計すること'},
+      {q:'比率差動継電器は何の保護に使うか',a:'変圧器・母線・発電機の内部故障保護。保護区間の流入電流と流出電流の差を検出する'},
+      {q:'距離継電器の動作原理を述べよ',a:'電圧と電流の比（インピーダンス）から故障点までの距離を判定し、整定範囲内の故障で動作する。送電線保護の主体'},
+    ]
+  },
+  {
+    id:'t5', freq:'mid', cat:'送配電',
+    title:'電力損失の低減策',
+    tags:['送配電','頻出','論説特化向け'],
+    memory:'「I²R」を下げるだけ。電流を下げるか抵抗を下げるかの2択',
+    diagram:`<svg viewBox="0 0 460 150" width="460" height="150" style="font-family:sans-serif">
+      <text x="230" y="22" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">P_loss = I² × R　─ 2つの方向</text>
+      <rect x="10" y="40" width="200" height="95" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="110" y="62" text-anchor="middle" fill="#e8a838" font-size="12" font-weight="bold">電流 I を下げる</text>
+      <text x="110" y="80" text-anchor="middle" fill="#c9d1d9" font-size="11">・昇圧送電（V↑ → I↓）</text>
+      <text x="110" y="97" text-anchor="middle" fill="#c9d1d9" font-size="11">・力率改善（進相コンデンサ）</text>
+      <text x="110" y="114" text-anchor="middle" fill="#c9d1d9" font-size="11">・ループ送電で電流分散</text>
+      <text x="110" y="128" text-anchor="middle" fill="#8b949e" font-size="10">↑ 効果が大きく優先</text>
+      <rect x="250" y="40" width="200" height="95" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="350" y="62" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="bold">抵抗 R を下げる</text>
+      <text x="350" y="80" text-anchor="middle" fill="#c9d1d9" font-size="11">・導体断面積の拡大</text>
+      <text x="350" y="97" text-anchor="middle" fill="#c9d1d9" font-size="11">・低抵抗材料の採用</text>
+      <text x="350" y="114" text-anchor="middle" fill="#c9d1d9" font-size="11">・ケーブル化</text>
+      <text x="350" y="128" text-anchor="middle" fill="#8b949e" font-size="10">↑ コストと重量に注意</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'損失式 P＝I²R を覚える。IとRのどちらを下げるかが全ての出発点'},
+      {num:'②',text:'電流低減：昇圧送電（電圧を上げれば同電力で電流が減る）、力率改善（進相コンデンサで無効電流を減らす）'},
+      {num:'③',text:'系統構成：ループ送電・多回線化で電流を分散。分散電源の需要地配置で長距離送電自体を減らす'},
+      {num:'④',text:'抵抗低減：導体断面積拡大・低抵抗材採用（コストと重量とのバランスが必要）'},
+    ],
+    keywords:[
+      {word:'I²R損失',core:true},{word:'力率改善',core:true},{word:'進相コンデンサ',core:true},{word:'昇圧送電',core:true},
+      {word:'無効電力',sub:true},{word:'導体断面積',sub:true},{word:'ループ送電',sub:true},{word:'潮流制御',sub:true}
+    ],
+    template:'①損失式P＝I²Rを提示 → ②電流低減策（昇圧・力率改善） → ③抵抗低減策（導体・構成） → ④系統構成による対策',
+    answers:[
+      {label:'標準問題',q:'送電線の電力損失低減策を述べよ',
+       a:`送電線の電力損失はP＝I²Rで表され、電流Iの低減と抵抗Rの低減が基本方針となる。
+
+（1）送電電圧の昇圧
+同一の送電電力に対して電圧を高めると電流が減少し、I²Rに比例する損失が大幅に低減する。超高圧送電や直流送電の採用が有効である。
+
+（2）力率の改善
+無効電力の流通は線路電流を増加させ損失を増大させる。受電端への進相コンデンサ設置やSVCの活用により力率を改善し、無効電流を低減する。
+
+（3）導体の低抵抗化
+導体断面積の拡大や低抵抗材料の採用により抵抗Rを低減する。ただしコストと重量増加とのバランスが必要である。
+
+（4）系統構成の最適化
+多回線化・ループ送電により電流を分散させる。また需要地近傍への分散電源配置により長距離送電電流そのものを減らすことも有効である。`
+      },
+      {label:'配電損失',q:'配電系統における電力損失の特徴と低減策を述べよ',
+       a:`配電系統は送電系統に比べ電圧が低く電流が大きいため、相対的に損失（特に銅損）が大きくなりやすい。
+
+（1）配電損失の特徴
+・線路抵抗による抵抗損（銅損）が支配的である。
+・負荷の時間変動が大きく、ピーク時に損失が集中する。
+・三相不平衡により中性線にも電流が流れ損失が増加する。
+
+（2）低減策
+・配電電圧の格上げ（例：6.6kV→22kV）により電流を減らす。
+・負荷中心への変電所・変圧器の配置最適化で送電距離を短縮する。
+・進相コンデンサの設置による力率改善。
+・電線の太線化・低損失化。
+・三相負荷の平衡化による不平衡損失の低減。
+・配電自動化による系統構成の最適化。`
+      }
+    ],
+    flashcards:[
+      {q:'送電損失の基本式と、それを下げる2方向を述べよ',a:'P＝I²R。①電流Iを下げる（昇圧・力率改善）　②抵抗Rを下げる（導体拡大・低抵抗材）'},
+      {q:'力率改善によって送電損失が下がる理由を述べよ',a:'無効電流が減少し、線路を流れる電流の実効値が小さくなるため、I²Rの損失が低減する'},
+      {q:'配電系統で損失が大きくなりやすい理由は？',a:'送電系統より電圧が低く電流が大きいため、I²Rの抵抗損（銅損）が相対的に大きくなる'},
+    ]
+  },
+  {
+    id:'t6', freq:'mid', cat:'送配電',
+    title:'再生可能エネルギー系統連系',
+    tags:['送配電','頻出','時事性高'],
+    memory:'「電圧・変動・逆流・孤島」の4問題セット。孤島が一番問われる',
+    diagram:`<svg viewBox="0 0 500 155" width="500" height="155" style="font-family:sans-serif">
+      <text x="250" y="20" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">太陽光大量連系の4つの問題</text>
+      <rect x="5" y="30" width="110" height="110" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="60" y="52" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">電圧上昇</text>
+      <text x="60" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">逆潮流で配電</text>
+      <text x="60" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">線電圧が上昇</text>
+      <text x="60" y="100" text-anchor="middle" fill="#8b949e" font-size="10">→ SVR・無効</text>
+      <text x="60" y="115" text-anchor="middle" fill="#8b949e" font-size="10">電力制御で対処</text>
+      <rect x="127" y="30" width="110" height="110" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="182" y="52" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">出力変動</text>
+      <text x="182" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">天候依存で</text>
+      <text x="182" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">周波数変動</text>
+      <text x="182" y="100" text-anchor="middle" fill="#8b949e" font-size="10">→ 蓄電池・</text>
+      <text x="182" y="115" text-anchor="middle" fill="#8b949e" font-size="10">揚水で吸収</text>
+      <rect x="249" y="30" width="110" height="110" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="304" y="52" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">保護協調</text>
+      <text x="304" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">逆潮流で従来</text>
+      <text x="304" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">継電器が誤動作</text>
+      <text x="304" y="100" text-anchor="middle" fill="#8b949e" font-size="10">→ 協調設計の</text>
+      <text x="304" y="115" text-anchor="middle" fill="#8b949e" font-size="10">見直し必要</text>
+      <rect x="371" y="30" width="120" height="110" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="431" y="52" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">孤島運転</text>
+      <text x="431" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">系統停電時に</text>
+      <text x="431" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">孤立動作 → 危険</text>
+      <text x="431" y="100" text-anchor="middle" fill="#8b949e" font-size="10">→ OFR・UFR</text>
+      <text x="431" y="115" text-anchor="middle" fill="#8b949e" font-size="10">単独運転検出</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'電圧上昇：逆潮流により配電線電圧が上昇。SVR（自動電圧調整器）・無効電力制御・出力抑制で対処'},
+      {num:'②',text:'出力変動：天候依存の急激な変動が周波数変動を招く。蓄電池・揚水発電で吸収'},
+      {num:'③',text:'保護協調への影響：逆潮流により従来の継電器動作が変化。協調設計の見直しが必要'},
+      {num:'④',text:'孤島運転防止：系統事故時に解列されず孤立動作。OFR・UFR・単独運転検出装置が義務'},
+    ],
+    keywords:[
+      {word:'孤島運転防止',core:true},{word:'逆潮流',core:true},{word:'電圧上昇',core:true},{word:'出力変動',core:true},
+      {word:'SVR',sub:true},{word:'OFR・UFR',sub:true},{word:'蓄電池',sub:true},{word:'揚水発電',sub:true}
+    ],
+    template:'①連系の意義・背景 → ②問題点を4項目（電圧・変動・保護・孤島）で列挙 → ③各問題の対策を対応させて記述',
+    answers:[
+      {label:'標準問題',q:'太陽光発電の大量連系による問題と対策を述べよ',
+       a:`太陽光発電の大量連系に伴う主な問題と対策を以下に述べる。
+
+（1）電圧上昇問題
+晴天の昼間に発電量が需要を上回ると逆潮流が生じ配電線電圧が上昇する。対策として、自動電圧調整器（SVR）の設置・高度化、パワーコンディショナによる無効電力制御、出力抑制制御が有効である。
+
+（2）出力変動による系統不安定
+天候変化による急激な出力変動は周波数変動の原因となる。蓄電池システムや揚水発電を活用して変動を吸収し需給バランスを維持する。
+
+（3）孤島運転の防止
+系統事故時に連系が解列されず発電機が孤立運転を続けると、保守員への感電や機器損傷の危険がある。周波数継電器（OFR・UFR）や能動的単独運転検出装置の設置が義務付けられている。
+
+（4）保護協調への影響
+逆潮流により従来の保護継電器の動作特性が変化する。系統構成の変化を考慮した保護協調の見直しが必要である。`
+      }
+    ],
+    flashcards:[
+      {q:'再エネ大量連系による4つの問題を列挙せよ',a:'①電圧上昇（逆潮流）\n②出力変動（周波数変動）\n③保護協調への影響\n④孤島運転の危険'},
+      {q:'孤島運転とは何か。防止策を述べよ',a:'系統停電時に連系が解列されず発電機が孤立動作する現象。\n防止策：OFR・UFR（周波数継電器）＋能動的単独運転検出装置'},
+    ]
+  },
+  {
+    id:'t7', freq:'mid', cat:'送配電',
+    title:'架空送電線の特性と障害対策',
+    tags:['送配電','頻出','コロナ・フェランチ'],
+    memory:'「コロナは電界、フェランチは軽負荷、雷は架空地線」',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="20" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">架空送電線の主な現象</text>
+      <rect x="5" y="30" width="140" height="110" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="75" y="52" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">コロナ放電</text>
+      <text x="75" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">表面電界 ＞ 限界</text>
+      <text x="75" y="86" text-anchor="middle" fill="#8b949e" font-size="10">（約30kV/cm）</text>
+      <text x="75" y="103" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 多導体化</text>
+      <text x="75" y="118" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 大径化</text>
+      <rect x="160" y="30" width="140" height="110" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="230" y="52" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">フェランチ効果</text>
+      <text x="230" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">軽負荷時に受電端</text>
+      <text x="230" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">電圧＞送電端電圧</text>
+      <text x="230" y="103" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 分路リアクトル</text>
+      <text x="230" y="118" text-anchor="middle" fill="#8b949e" font-size="10">充電電流が原因</text>
+      <rect x="315" y="30" width="155" height="110" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="392" y="52" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">雷害</text>
+      <text x="392" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">直撃雷・誘導雷</text>
+      <text x="392" y="87" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 架空地線で遮蔽</text>
+      <text x="392" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 避雷器で保護</text>
+      <text x="392" y="118" text-anchor="middle" fill="#8b949e" font-size="10">逆フラッシオーバに注意</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'コロナ放電：表面電界が空気の絶縁破壊限界（約30kV/cm）超で発生。多導体化・太径化で電界を下げる'},
+      {num:'②',text:'フェランチ効果：軽負荷・無負荷時に充電電流で受電端電圧が送電端より高くなる。分路リアクトルで対策'},
+      {num:'③',text:'雷害：直撃雷は架空地線で遮蔽、誘導雷は避雷器で保護。逆フラッシオーバにも注意'},
+      {num:'④',text:'ギャロッピング・スリート：着氷雪による振動。相間スペーサ・難着雪電線で対策'},
+    ],
+    keywords:[
+      {word:'コロナ放電',core:true},{word:'フェランチ効果',core:true},{word:'架空地線',core:true},{word:'避雷器',core:true},
+      {word:'多導体',sub:true},{word:'分路リアクトル',sub:true},{word:'逆フラッシオーバ',sub:true}
+    ],
+    template:'問われた現象の定義 → 発生原因 → 影響・問題点 → 対策を列挙',
+    answers:[
+      {label:'コロナ',q:'架空送電線のコロナ現象と対策を述べよ',
+       a:`コロナ放電は導体表面の電界強度が空気の絶縁破壊限界（約30kV/cm）を超えた際に発生する部分放電現象である。
+
+コロナ放電の影響：コロナ損失による送電効率低下、電波障害、騒音、導体腐食など。
+
+対策：
+（1）多導体化：複数の素導体を束ねて等価的な太径導体とし、表面電界強度を低下させる。超高圧送電線では4〜8導体が標準的。
+（2）導体径の拡大：素導体径を大きくすることで表面電界を低下させる。
+（3）がいしの管理：汚損によるコロナを防ぐため定期清掃・点検を実施する。`
+      },
+      {label:'フェランチ',q:'フェランチ効果とその対策を述べよ',
+       a:`フェランチ効果とは、軽負荷時または無負荷時に長距離送電線の受電端電圧が送電端電圧より高くなる現象をいう。
+
+発生原因：送電線の対地静電容量に流れる充電電流が線路のインダクタンスに電圧降下を生じさせ、受電端電圧を上昇させる。負荷電流が小さいほど充電電流の影響が相対的に大きくなる。
+
+影響：受電端の機器に過電圧が印加され絶縁破壊や保護継電器の誤動作を招く恐れがある。
+
+対策：
+・分路リアクトルを受電端に設置し、充電電流を打ち消す。
+・夜間など軽負荷時に分路リアクトルを投入する運用が一般的である。`
+      }
+    ],
+    flashcards:[
+      {q:'フェランチ効果とは何か。発生原因と対策を述べよ',a:'軽負荷時に受電端電圧が送電端より高くなる現象。充電電流が原因。対策：分路リアクトルの設置'},
+      {q:'コロナ放電を抑制する方法を2つ挙げよ',a:'①多導体化（表面電界を下げる）\n②導体径の拡大'},
+      {q:'架空送電線の雷対策を2つ挙げよ',a:'①架空地線（直撃雷を遮蔽）\n②避雷器（誘導雷から機器を保護）'},
+    ]
+  },
+  {
+    id:'t8', freq:'mid', cat:'送配電',
+    title:'電力品質・電圧管理',
+    tags:['送配電','頻出','無効電力'],
+    memory:'「電圧は無効電力で動く」― Qを制御することが電圧管理の本質',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">電圧調整の手段マップ</text>
+      <rect x="5" y="28" width="100" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="55" y="48" text-anchor="middle" fill="#e8a838" font-size="10" font-weight="bold">タップ調整</text>
+      <text x="55" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">変圧器</text>
+      <text x="55" y="80" text-anchor="middle" fill="#c9d1d9" font-size="10">タップ切換</text>
+      <text x="55" y="98" text-anchor="middle" fill="#8b949e" font-size="10">応答：遅い</text>
+      <text x="55" y="113" text-anchor="middle" fill="#8b949e" font-size="10">安定変動向け</text>
+      <rect x="118" y="28" width="100" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="168" y="48" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="bold">進相コンデンサ</text>
+      <text x="168" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">無効電力補償</text>
+      <text x="168" y="80" text-anchor="middle" fill="#c9d1d9" font-size="10">力率改善</text>
+      <text x="168" y="98" text-anchor="middle" fill="#8b949e" font-size="10">応答：中</text>
+      <text x="168" y="113" text-anchor="middle" fill="#8b949e" font-size="10">受電端に設置</text>
+      <rect x="231" y="28" width="100" height="112" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="281" y="48" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="bold">SVR</text>
+      <text x="281" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">自動電圧調整器</text>
+      <text x="281" y="80" text-anchor="middle" fill="#c9d1d9" font-size="10">線路途中設置</text>
+      <text x="281" y="98" text-anchor="middle" fill="#8b949e" font-size="10">再エネ連系で</text>
+      <text x="281" y="113" text-anchor="middle" fill="#8b949e" font-size="10">重要度増</text>
+      <rect x="344" y="28" width="128" height="112" rx="8" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="408" y="48" text-anchor="middle" fill="#bc8cff" font-size="10" font-weight="bold">SVC/STATCOM</text>
+      <text x="408" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">半導体で連続</text>
+      <text x="408" y="80" text-anchor="middle" fill="#c9d1d9" font-size="10">高速制御</text>
+      <text x="408" y="98" text-anchor="middle" fill="#8b949e" font-size="10">応答：最速</text>
+      <text x="408" y="113" text-anchor="middle" fill="#8b949e" font-size="10">フリッカ対策</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'電圧と無効電力の関係：無効電力Qを制御することで電圧を調整できる（これが根本原理）'},
+      {num:'②',text:'タップ調整：変圧器タップ切換。応答は遅いが安定した変動に有効'},
+      {num:'③',text:'進相コンデンサ：無効電力を補償し電圧降下を抑制。力率改善も同時に実現'},
+      {num:'④',text:'SVC・STATCOM：電力用半導体で無効電力を連続高速制御。電気炉等のフリッカ対策に最適'},
+    ],
+    keywords:[
+      {word:'無効電力',core:true},{word:'進相コンデンサ',core:true},{word:'SVC',core:true},{word:'高調波',core:true},
+      {word:'STATCOM',sub:true},{word:'電圧フリッカ',sub:true},{word:'SVR',sub:true},{word:'THD',sub:true}
+    ],
+    template:'①電圧管理の原理（無効電力との関係） → ②調整手段を応答速度順に列挙 → ③高調波対策（フィルタ・リアクトル）',
+    answers:[
+      {label:'標準問題',q:'配電系統の電圧管理手法を述べよ',
+       a:`配電系統における電圧管理の主な手法を以下に述べる。
+
+（1）変圧器タップ調整
+変圧器のタップを切り換えて電圧を調整する。応答速度は遅いが安定した需要変動に対応できる。
+
+（2）進相コンデンサの設置
+受電端に進相コンデンサを設置し無効電力を補償することで電圧降下を抑制する。力率改善と電圧維持を同時に実現できる。
+
+（3）自動電圧調整器（SVR）
+線路途中に設置し送受電端の電圧差に応じて自動的に調整する。再生可能エネルギー連系に伴う電圧変動対策として重要度が増している。
+
+（4）SVC・STATCOMの活用
+電力用半導体を用いて無効電力を連続的かつ高速に制御する。電気炉等の変動負荷による電圧フリッカの抑制に特に有効である。`
+      },
+      {label:'高調波対策',q:'電力系統における高調波の発生原因・影響・対策を述べよ',
+       a:`（1）発生原因
+インバータ、整流器、アーク炉などの非線形負荷が基本波以外の周波数成分（高調波電流）を発生させる。第5次・第7次高調波が主体となることが多い。
+
+（2）影響
+・進相コンデンサの過熱・焼損（高調波電流が流れ込みやすい）。
+・変圧器・電動機の過熱・損失増加。
+・保護継電器の誤動作。
+・通信線への誘導障害。
+
+（3）対策
+・高調波フィルタ（受動フィルタ）の設置：特定次数の高調波を吸収する。
+・アクティブフィルタの設置：高調波と逆位相の電流を注入して打ち消す。
+・進相コンデンサへの直列リアクトル接続：高調波の拡大（共振）を防止する。
+・PWM制御の多パルス化：発生源側で高調波を抑制する。
+
+総合高調波歪率（THD）を指標として管理し、高調波抑制ガイドラインに基づき需要家側で対策する。`
+      }
+    ],
+    flashcards:[
+      {q:'電圧管理の手段を応答速度の遅い順に4つ挙げよ',a:'①タップ調整（遅い）→ ②進相コンデンサ → ③SVR → ④SVC・STATCOM（最速）'},
+      {q:'高調波の発生原因と対策を述べよ',a:'原因：インバータ・整流器等の非線形負荷\n対策：受電端への高調波フィルタ設置、直列リアクトル挿入'},
+      {q:'進相コンデンサに直列リアクトルを接続する理由は？',a:'高調波電流の流入による共振・拡大を防止し、コンデンサの過熱・焼損を防ぐため'},
+    ]
+  },
+  {
+    id:'t9', freq:'mid', cat:'施設管理',
+    title:'施設管理・保守点検',
+    tags:['施設管理','頻出','現場直結'],
+    memory:'「TBM＝時間、CBM＝状態」― 現場でやっているのがTBM、最近主流がCBM',
+    diagram:`<svg viewBox="0 0 480 155" width="480" height="155" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">保全方式の比較</text>
+      <rect x="5" y="28" width="140" height="120" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="75" y="50" text-anchor="middle" fill="#e8a838" font-size="12" font-weight="bold">TBM</text>
+      <text x="75" y="66" text-anchor="middle" fill="#e8a838" font-size="10">時間基準保全</text>
+      <text x="75" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">定期的に実施</text>
+      <text x="75" y="100" text-anchor="middle" fill="#c9d1d9" font-size="10">計画立案しやすい</text>
+      <text x="75" y="116" text-anchor="middle" fill="#8b949e" font-size="10">過剰保全の恐れ</text>
+      <text x="75" y="130" text-anchor="middle" fill="#8b949e" font-size="10">停電点検・絶縁測定</text>
+      <rect x="170" y="28" width="140" height="120" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="240" y="50" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="bold">CBM</text>
+      <text x="240" y="66" text-anchor="middle" fill="#58a6ff" font-size="10">状態監視保全</text>
+      <text x="240" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">異常兆候で対処</text>
+      <text x="240" y="100" text-anchor="middle" fill="#c9d1d9" font-size="10">効率的・経済的</text>
+      <text x="240" y="116" text-anchor="middle" fill="#8b949e" font-size="10">部分放電・tanδ測定</text>
+      <text x="240" y="130" text-anchor="middle" fill="#8b949e" font-size="10">近年主流になりつつ</text>
+      <rect x="335" y="28" width="138" height="120" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="404" y="50" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="bold">BM</text>
+      <text x="404" y="66" text-anchor="middle" fill="#3fb950" font-size="10">事後保全</text>
+      <text x="404" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">故障後に修理</text>
+      <text x="404" y="100" text-anchor="middle" fill="#c9d1d9" font-size="10">重要度低設備のみ</text>
+      <text x="404" y="116" text-anchor="middle" fill="#8b949e" font-size="10">重要設備には不可</text>
+      <text x="404" y="130" text-anchor="middle" fill="#8b949e" font-size="10">コスト最小</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'TBM（Time Based）：時間基準保全。定期的に計画実施。停電点検・絶縁測定・継電器試験が代表例'},
+      {num:'②',text:'CBM（Condition Based）：状態監視保全。部分放電・誘電正接（tanδ）で劣化を早期検出'},
+      {num:'③',text:'BM（Breakdown）：事後保全。重要度の低い設備に限定'},
+      {num:'④',text:'絶縁診断：絶縁抵抗測定（簡便）→ tanδ測定（内部劣化検出）→ 部分放電測定（局所欠陥検出）'},
+    ],
+    keywords:[
+      {word:'TBM（時間基準保全）',core:true},{word:'CBM（状態監視保全）',core:true},
+      {word:'絶縁抵抗',core:true},{word:'部分放電',core:true},{word:'誘電正接（tanδ）',core:true},
+      {word:'絶縁劣化診断',sub:true},{word:'停電点検',sub:true},{word:'継電器試験',sub:true}
+    ],
+    template:'①保全方式の3分類（TBM・CBM・BM）を定義 → ②各方式の特徴と適用範囲 → ③絶縁診断手法を列挙',
+    answers:[
+      {label:'標準問題',q:'電気設備の保全方式と絶縁診断手法を述べよ',
+       a:`電気設備の保全方式は以下の3種に大別される。
+
+（1）予防保全（TBM：Time Based Maintenance）
+あらかじめ定めた時間基準で定期的に点検・整備を実施する方式。停電点検時の絶縁抵抗測定、継電器動作試験、接触部の増締めなどが含まれる。計画的な保全が可能であるが過剰保全になる場合がある。
+
+（2）状態監視保全（CBM：Condition Based Maintenance）
+設備の状態を継続的に監視し異常の兆候が現れた際に対処する方式。部分放電測定・誘電正接（tanδ）測定・絶縁劣化診断を活用したCBMが近年普及している。
+
+（3）事後保全（BM：Breakdown Maintenance）
+故障後に修理する方式。重要度の低い設備に限定して採用する。
+
+主な絶縁診断手法：
+・絶縁抵抗測定：簡便で広く用いられるが表面状態の影響を受けやすい
+・誘電正接測定（tanδ）：絶縁体の内部劣化を感度よく検出できる
+・部分放電測定：局所的な絶縁欠陥の検出に有効`
+      },
+      {label:'保守の体系的計画',q:'自家用電気工作物の保守管理を体系的に述べよ',
+       a:`自家用電気工作物の保守管理は、保安規程に基づき計画的に実施する。
+
+（1）日常点検（巡視）
+運転中に外観・音・におい・温度・計器値などを目視・五感で確認する。異常の早期発見が目的である。
+
+（2）定期点検
+一定周期で停電させ、絶縁抵抗測定・接続部の増締め・継電器動作試験・清掃などを行う。年次点検が代表的である。
+
+（3）精密点検
+数年周期で機器を分解し、内部の劣化状況を詳細に診断する。
+
+（4）測定・試験項目
+絶縁抵抗測定、接地抵抗測定、絶縁耐力試験、保護継電器の動作特性試験、変圧器油の絶縁破壊電圧試験など。
+
+（5）記録の管理
+点検・測定結果を記録し経年変化を把握することで、劣化傾向の予測と更新計画に活用する。デジタル化により傾向管理が容易になっている。`
+      },
+      {label:'劣化要因',q:'電気機器の絶縁劣化の要因と診断について述べよ',
+       a:`（1）絶縁劣化の主な要因
+・熱的要因：通電による温度上昇で絶縁materialが化学的に劣化する。アレニウスの法則に従い、温度が高いほど劣化が加速する。
+・電気的要因：過電圧・部分放電により絶縁体内部にボイドや trees（電気トリー）が発生する。
+・機械的要因：振動・電磁力の繰り返しによる機械的疲労。
+・環境的要因：吸湿・汚損・化学物質による劣化。
+
+（2）診断手法
+・絶縁抵抗・成極指数：吸湿や表面汚損の影響を把握する。
+・誘電正接（tanδ）測定：絶縁体全体の劣化度を定量評価する。
+・部分放電測定：内部のボイドや欠陥を検出する。
+・油中ガス分析：変圧器油に溶け込んだガス成分から内部異常を推定する。
+
+（3）診断の意義
+劣化の程度を定量的に把握し、計画的な更新により突発事故を防ぐことができる。`
+      }
+    ],
+    flashcards:[
+      {q:'TBM・CBM・BMの違いを一行ずつ述べよ',a:'TBM：時間基準で定期保全（計画的だが過剰保全の恐れ）\nCBM：状態監視で必要時に保全（効率的・経済的）\nBM：故障後に保全（重要度低設備のみ適用）'},
+      {q:'絶縁診断手法を感度の低い順に3つ挙げよ',a:'①絶縁抵抗測定（簡便・表面の状態に影響されやすい）\n②誘電正接（tanδ）測定（内部劣化を検出）\n③部分放電測定（局所欠陥を最高感度で検出）'},
+      {q:'絶縁劣化の4つの要因を挙げよ',a:'①熱的要因（温度上昇）②電気的要因（過電圧・部分放電）③機械的要因（振動・疲労）④環境的要因（吸湿・汚損）'},
+      {q:'変圧器の油中ガス分析で何がわかるか',a:'絶縁油に溶け込んだガス成分の種類・量から、変圧器内部の過熱・放電などの異常を推定できる'},
+      {q:'日常点検（巡視）の目的は？',a:'運転中に五感で外観・音・におい・温度・計器値を確認し、異常を早期発見すること'},
+    ]
+  },
+  {
+    id:'t10', freq:'mid', cat:'施設管理',
+    title:'電力需給・負荷管理',
+    tags:['施設管理','頻出','現場直結'],
+    memory:'「デマンド＝30分最大値の管理」― 基本料金に直結するので現場では最重要',
+    diagram:`<svg viewBox="0 0 460 150" width="460" height="150" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">負荷平準化の手法</text>
+      <rect x="5" y="28" width="130" height="110" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="70" y="50" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">ピークカット</text>
+      <text x="70" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">ピーク時の需要</text>
+      <text x="70" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">そのものを削減</text>
+      <text x="70" y="104" text-anchor="middle" fill="#8b949e" font-size="10">空調・照明の</text>
+      <text x="70" y="120" text-anchor="middle" fill="#8b949e" font-size="10">デマンド制御</text>
+      <rect x="148" y="28" width="130" height="110" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="213" y="50" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">ピークシフト</text>
+      <text x="213" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">需要を他の</text>
+      <text x="213" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">時間帯に移動</text>
+      <text x="213" y="104" text-anchor="middle" fill="#8b949e" font-size="10">蓄熱空調・</text>
+      <text x="213" y="120" text-anchor="middle" fill="#8b949e" font-size="10">蓄電池活用</text>
+      <rect x="291" y="28" width="162" height="110" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="372" y="50" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">デマンド制御</text>
+      <text x="372" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">30分最大需要電力</text>
+      <text x="372" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">を契約値以下に</text>
+      <text x="372" y="104" text-anchor="middle" fill="#8b949e" font-size="10">基本料金の</text>
+      <text x="372" y="120" text-anchor="middle" fill="#8b949e" font-size="10">超過防止</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'負荷率＝平均需要電力/最大需要電力×100(%)。高いほど設備が効率的に使われている'},
+      {num:'②',text:'デマンド制御：30分最大需要電力を監視し契約デマンドを超えないよう自動制御'},
+      {num:'③',text:'ピークカット：空調・照明制御でピーク需要そのものを削減'},
+      {num:'④',text:'ピークシフト：蓄熱・蓄電を活用して需要を夜間等に移動。需要応答（DR）も活用'},
+    ],
+    keywords:[
+      {word:'負荷率',core:true},{word:'デマンド制御',core:true},{word:'ピークカット',core:true},{word:'負荷平準化',core:true},
+      {word:'ピークシフト',sub:true},{word:'蓄熱槽',sub:true},{word:'需要応答（DR）',sub:true},{word:'最大需要電力',sub:true}
+    ],
+    template:'①負荷平準化の意義（設備コスト・CO₂削減） → ②手法を3点（ピークカット・シフト・デマンド制御） → ③需要家メリット（基本料金削減）',
+    answers:[
+      {label:'標準問題',q:'電力需要の負荷平準化の意義と手法を述べよ',
+       a:`負荷平準化とは電力需要の時間的変動を平滑化しピーク需要を低減することをいう。
+
+（1）意義
+電力設備は最大需要に対応できる容量で設計されるため、ピーク需要の低減は発電所・送変電設備の設備コスト低減に直結する。また効率の低いピーク対応電源の稼働を減らすことでCO₂排出削減にも寄与する。
+
+（2）主な手法
+・ピークカット：空調・照明等の制御によりピーク時の需要そのものを削減する。
+・ピークシフト：需要をピーク時間帯から他の時間帯に移動する（蓄熱空調・蓄電池の活用）。
+・デマンド制御：30分最大需要電力を監視し契約デマンドを超えないよう自動で負荷を制御する。
+・需要応答（DR）：電力会社の要請に応じて需要を抑制または増加させる仕組み。
+
+（3）需要家の経済的メリット
+契約デマンド値の引き下げにより基本料金削減が実現し省エネと経済性向上の両立が図れる。`
+      }
+    ],
+    flashcards:[
+      {q:'負荷率の計算式を述べよ',a:'負荷率（%）＝ 平均需要電力 ÷ 最大需要電力 × 100'},
+      {q:'デマンド制御とは何か',a:'30分最大需要電力を監視し、契約デマンドを超えないよう空調・照明等を自動制御すること。超過すると基本料金が上がるため重要'},
+      {q:'ピークカットとピークシフトの違いを述べよ',a:'ピークカット：ピーク時の需要そのものを削減する\nピークシフト：需要を別の時間帯に移動させる（蓄熱・蓄電を活用）'},
+    ]
+  },
+  {
+    id:'t11', freq:'low', cat:'発変電',
+    title:'水力発電',
+    tags:['発変電','出題あり','計算混合'],
+    memory:'「水力＝P＝9.8QHη」この式と揚水の役割だけ確実に',
+    diagram:`<svg viewBox="0 0 460 150" width="460" height="150" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">水力発電の種類と揚水の役割</text>
+      <rect x="5" y="28" width="130" height="112" rx="8" fill="#1c2128" stroke="#8b949e" stroke-width="1.5"/>
+      <text x="70" y="50" text-anchor="middle" fill="#8b949e" font-size="11">流れ込み式</text>
+      <text x="70" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">河川流量をそのまま</text>
+      <text x="70" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">季節変動大</text>
+      <text x="70" y="104" text-anchor="middle" fill="#8b949e" font-size="10">調整力なし</text>
+      <rect x="148" y="28" width="130" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="213" y="50" text-anchor="middle" fill="#58a6ff" font-size="11">調整池・貯水池式</text>
+      <text x="213" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">ダムで水量調整</text>
+      <text x="213" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">ピーク対応可能</text>
+      <text x="213" y="104" text-anchor="middle" fill="#8b949e" font-size="10">中程度の調整力</text>
+      <rect x="291" y="28" width="162" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="372" y="50" text-anchor="middle" fill="#e8a838" font-size="12" font-weight="bold">揚水式 ★重要</text>
+      <text x="372" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">夜間余剰電力で揚水</text>
+      <text x="372" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">ピーク時に発電</text>
+      <text x="372" y="104" text-anchor="middle" fill="#8b949e" font-size="10">効率70〜75%</text>
+      <text x="372" y="120" text-anchor="middle" fill="#8b949e" font-size="10">再エネ普及で重要性↑</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'出力式 P＝9.8×Q×H×η（Q：流量m³/s、H：有効落差m）を必ず覚える'},
+      {num:'②',text:'流れ込み式：河川流量依存。調整力は小。水力の基本形'},
+      {num:'③',text:'揚水式：夜間余剰電力で揚水→昼間ピークに発電。総合効率70〜75%。再エネ時代に最重要'},
+      {num:'④',text:'起動停止が迅速で、周波数調整・瞬動予備力としても機能する'},
+    ],
+    keywords:[
+      {word:'揚水発電',core:true},{word:'有効落差',core:true},{word:'P＝9.8QHη',core:true},
+      {word:'流れ込み式',sub:true},{word:'調整池式',sub:true},{word:'ペルトン水車',sub:true},{word:'フランシス水車',sub:true}
+    ],
+    template:'①水力の種類を列挙 → ②揚水発電の原理と系統上の役割 → ③効率と運用上の特徴',
+    answers:[
+      {label:'標準問題',q:'揚水発電所の役割と特徴を述べよ',
+       a:`揚水発電所は電力貯蔵・ピーク対応・需給調整の役割を担う。
+
+（1）基本動作
+夜間等の余剰電力で電動機として下部貯水池から上部貯水池へ揚水し、需要ピーク時には発電機として電力に変換する。
+
+（2）系統調整機能
+再生可能エネルギーの大量導入により、昼間の余剰電力と夜間・悪天候時の不足を補う蓄電手段として重要性が増している。周波数調整や瞬動予備力としての機能も持つ。
+
+（3）特徴
+総合効率（揚水効率×発電効率）は70〜75%程度。エネルギー損失を伴うが系統安定化への貢献は大きい。起動停止が迅速で系統変動に柔軟に対応できる。`
+      }
+    ],
+    flashcards:[
+      {q:'水力発電の出力式を述べよ',a:'P ＝ 9.8 × Q × H × η\n（Q：流量m³/s、H：有効落差m、η：総合効率）'},
+      {q:'揚水発電の役割を2つ挙げよ',a:'①夜間余剰電力を位置エネルギーとして蓄電し、ピーク時に放電\n②周波数調整・瞬動予備力として系統安定化に貢献'},
+    ]
+  },
+  {
+    id:'t12', freq:'high', cat:'発変電',
+    title:'変電所の役割と主要機器',
+    tags:['発変電','超頻出','機器名称'],
+    memory:'「変電所は昇圧・降圧・切替・保護の4役」― 機器を役割と対応させて覚える',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">変電所の主要機器と役割</text>
+      <rect x="5" y="28" width="105" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="57" y="50" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">変圧器</text>
+      <text x="57" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">電圧変換</text>
+      <text x="57" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">昇圧・降圧</text>
+      <text x="57" y="104" text-anchor="middle" fill="#8b949e" font-size="10">タップで調整</text>
+      <rect x="123" y="28" width="105" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="175" y="50" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">遮断器（CB）</text>
+      <text x="175" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">負荷電流・</text>
+      <text x="175" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">事故電流遮断</text>
+      <text x="175" y="104" text-anchor="middle" fill="#8b949e" font-size="10">SF₆・真空式</text>
+      <rect x="241" y="28" width="105" height="112" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="293" y="50" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">断路器（DS）</text>
+      <text x="293" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">無負荷時の</text>
+      <text x="293" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">回路分離</text>
+      <text x="293" y="104" text-anchor="middle" fill="#8b949e" font-size="10">負荷電流は</text>
+      <text x="293" y="118" text-anchor="middle" fill="#8b949e" font-size="10">開閉不可</text>
+      <rect x="359" y="28" width="115" height="112" rx="8" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="416" y="50" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="bold">計器用変成器</text>
+      <text x="416" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">CT（電流）</text>
+      <text x="416" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">VT（電圧）</text>
+      <text x="416" y="104" text-anchor="middle" fill="#8b949e" font-size="10">保護継電器へ</text>
+      <text x="416" y="118" text-anchor="middle" fill="#8b949e" font-size="10">信号を供給</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'変圧器：電圧変換の主役。タップで電圧調整。鉄損・銅損が発生'},
+      {num:'②',text:'遮断器（CB）：負荷電流・事故電流を遮断。SF₆ガス式や真空式が現在の主流'},
+      {num:'③',text:'断路器（DS）：無負荷時の回路分離のみ。負荷電流の開閉は不可（重要）'},
+      {num:'④',text:'CT・VT（計器用変成器）：高電圧・大電流を計器・継電器用の低値に変換して供給'},
+    ],
+    keywords:[
+      {word:'遮断器（CB）',core:true},{word:'断路器（DS）',core:true},{word:'CT（変流器）',core:true},
+      {word:'VT（計器用変圧器）',core:true},{word:'避雷器',core:true},
+      {word:'SF₆ガス',sub:true},{word:'真空遮断器',sub:true},{word:'GIS',sub:true}
+    ],
+    template:'①変電所の機能・役割 → ②主要機器を列挙（変圧器・CB・DS・CT・VT・避雷器） → ③CBとDSの違いを明確に',
+    answers:[
+      {label:'標準問題',q:'変電所の主要機器とその役割を述べよ',
+       a:`変電所は電圧の変換、系統の切り替え、事故時の保護を主な機能とする。主要機器を以下に述べる。
+
+（1）変圧器
+系統間の電圧変換を行う。タップ切換により出力電圧を調整できる。
+
+（2）遮断器（CB）
+正常時の負荷電流から事故時の短絡電流まで開閉できる機器。現在はSF₆ガス式または真空式が主流。
+
+（3）断路器（DS）
+無負荷状態での回路の分離・接続に用いる。負荷電流の開閉はできないため、必ず遮断器で回路を開いてから操作する。
+
+（4）計器用変成器（CT・VT）
+高電圧・大電流を保護継電器や計器が扱える低値に変換する。CTは電流変換、VTは電圧変換を行う。
+
+（5）避雷器
+雷サージや開閉サージから機器を保護する。`
+      }
+    ],
+    flashcards:[
+      {q:'遮断器（CB）と断路器（DS）の違いを述べよ',a:'CB：負荷電流・事故電流の開閉が可能\nDS：無負荷時の回路分離のみ（負荷電流の開閉は不可）'},
+      {q:'CTとVTの役割の違いを述べよ',a:'CT（変流器）：大電流を5A等の小電流に変換して継電器・計器へ供給\nVT（計器用変圧器）：高電圧を110V等の低電圧に変換して供給'},
+    ]
+  },
+  {
+    id:'t13', freq:'mid', cat:'発変電',
+    title:'無停電電源設備（UPS）と非常用電源',
+    tags:['施設管理','頻出','現場直結'],
+    memory:'「UPS＝常時・ラインインタラクティブ・常時商用」の3方式。現場で使うのは常時インバータ方式',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">非常用電源の種類と特徴</text>
+      <rect x="5" y="28" width="140" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="75" y="50" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">UPS</text>
+      <text x="75" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">無停電電源装置</text>
+      <text x="75" y="82" text-anchor="middle" fill="#c9d1d9" font-size="10">瞬時（0秒）切換</text>
+      <text x="75" y="98" text-anchor="middle" fill="#c9d1d9" font-size="10">蓄電池でバックアップ</text>
+      <text x="75" y="114" text-anchor="middle" fill="#8b949e" font-size="10">IT・精密機器向け</text>
+      <rect x="165" y="28" width="140" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="235" y="50" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">非常用発電機</text>
+      <text x="235" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">ディーゼル・ガスタービン</text>
+      <text x="235" y="82" text-anchor="middle" fill="#c9d1d9" font-size="10">起動まで10〜40秒</text>
+      <text x="235" y="98" text-anchor="middle" fill="#c9d1d9" font-size="10">消防設備・空調向け</text>
+      <text x="235" y="114" text-anchor="middle" fill="#8b949e" font-size="10">定期試験運転必要</text>
+      <rect x="325" y="28" width="148" height="112" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="399" y="50" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">蓄電池設備</text>
+      <text x="399" y="66" text-anchor="middle" fill="#c9d1d9" font-size="10">制御電源・非常照明</text>
+      <text x="399" y="82" text-anchor="middle" fill="#c9d1d9" font-size="10">直流電源供給</text>
+      <text x="399" y="98" text-anchor="middle" fill="#c9d1d9" font-size="10">遮断器操作電源に</text>
+      <text x="399" y="114" text-anchor="middle" fill="#8b949e" font-size="10">必須（停電中も動作）</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'UPS（無停電電源装置）：常時インバータ方式が最も高品質。瞬時（0秒）で電源供給を継続'},
+      {num:'②',text:'非常用発電機：ディーゼル・ガスタービン式。起動まで10〜40秒。消防設備等の法定設備向け'},
+      {num:'③',text:'蓄電池設備：制御電源・非常照明・CB操作電源に不可欠。停電中でも継電器が動作できる'},
+      {num:'④',text:'選択の考え方：瞬断不可→UPS、数十秒の停電許容→非常用発電機、直流電源→蓄電池'},
+    ],
+    keywords:[
+      {word:'UPS（無停電電源装置）',core:true},{word:'非常用発電機',core:true},{word:'蓄電池',core:true},
+      {word:'常時インバータ方式',sub:true},{word:'ディーゼル発電機',sub:true},{word:'定期試験運転',sub:true}
+    ],
+    template:'①各設備の用途・切換時間 → ②UPSの3方式（常時・ライン・常時商用） → ③保守管理上の注意点',
+    answers:[
+      {label:'標準問題',q:'施設における非常用電源設備の種類と特徴を述べよ',
+       a:`施設における主な非常用電源設備を以下に述べる。
+
+（1）UPS（無停電電源装置）
+商用電源の停電・電圧変動時に瞬断なく電力を供給する装置。常時インバータ方式では常に蓄電池を介して電力を供給するため、波形品質が高くコンピュータや精密機器の電源として最適である。
+
+（2）非常用発電機
+ディーゼルエンジンまたはガスタービンを原動力とする発電機。起動までに10〜40秒を要するため、消防設備・非常用照明・エレベーター等の法定設備のバックアップとして用いられる。月次・年次の定期試験運転が義務付けられている。
+
+（3）蓄電池設備
+保護継電器・遮断器の操作電源および非常照明の直流電源として使用される。停電中でも継電器が正常に動作するために必須の設備である。`
+      }
+    ],
+    flashcards:[
+      {q:'UPSと非常用発電機の切換時間の違いを述べよ',a:'UPS：0秒（瞬断なし）\n非常用発電機：起動まで10〜40秒かかる'},
+      {q:'蓄電池設備が施設に必要な理由を述べよ',a:'停電中でも保護継電器・遮断器が動作できるよう直流操作電源を供給するため。蓄電池なしでは事故時に遮断器を操作できない'},
+    ]
+  },
+  {
+    id:'t14', freq:'low', cat:'法規',
+    title:'電気設備の接地方式',
+    tags:['法規','出題あり'],
+    memory:'「A種は高圧、B種は変圧器中性点、C種は300V超、D種は300V以下」― ABCDの順番で覚える',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">接地工事の種類と抵抗値</text>
+      <rect x="5" y="28" width="110" height="112" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="60" y="50" text-anchor="middle" fill="#f85149" font-size="12" font-weight="bold">A種</text>
+      <text x="60" y="70" text-anchor="middle" fill="#c9d1d9" font-size="11">高圧・特高圧</text>
+      <text x="60" y="87" text-anchor="middle" fill="#c9d1d9" font-size="11">機器の外箱</text>
+      <text x="60" y="107" text-anchor="middle" fill="#e8a838" font-size="13" font-weight="bold">10Ω以下</text>
+      <rect x="127" y="28" width="110" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="182" y="50" text-anchor="middle" fill="#e8a838" font-size="12" font-weight="bold">B種</text>
+      <text x="182" y="70" text-anchor="middle" fill="#c9d1d9" font-size="11">変圧器</text>
+      <text x="182" y="87" text-anchor="middle" fill="#c9d1d9" font-size="11">中性点・外箱</text>
+      <text x="182" y="107" text-anchor="middle" fill="#e8a838" font-size="13" font-weight="bold">計算値</text>
+      <rect x="249" y="28" width="110" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="304" y="50" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="bold">C種</text>
+      <text x="304" y="70" text-anchor="middle" fill="#c9d1d9" font-size="11">300V超の</text>
+      <text x="304" y="87" text-anchor="middle" fill="#c9d1d9" font-size="11">低圧機器</text>
+      <text x="304" y="107" text-anchor="middle" fill="#e8a838" font-size="13" font-weight="bold">10Ω以下</text>
+      <rect x="371" y="28" width="104" height="112" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="423" y="50" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="bold">D種</text>
+      <text x="423" y="70" text-anchor="middle" fill="#c9d1d9" font-size="11">300V以下の</text>
+      <text x="423" y="87" text-anchor="middle" fill="#c9d1d9" font-size="11">低圧機器</text>
+      <text x="423" y="107" text-anchor="middle" fill="#e8a838" font-size="13" font-weight="bold">100Ω以下</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'A種：高圧・特高圧機器の外箱。接地抵抗10Ω以下'},
+      {num:'②',text:'B種：変圧器の中性点。抵抗値は地絡電流から計算で決まる（150/地絡電流など）'},
+      {num:'③',text:'C種：300V超の低圧機器外箱。接地抵抗10Ω以下'},
+      {num:'④',text:'D種：300V以下の低圧機器外箱。接地抵抗100Ω以下。最も身近な接地工事'},
+    ],
+    keywords:[
+      {word:'A種接地（10Ω）',core:true},{word:'B種接地（計算値）',core:true},
+      {word:'C種接地（10Ω）',core:true},{word:'D種接地（100Ω）',core:true},
+      {word:'感電防止',sub:true},{word:'地絡電流',sub:true}
+    ],
+    template:'①接地の目的（感電防止・機器保護） → ②4種類を対象設備と抵抗値で列挙 → ③接地の施工要件',
+    answers:[
+      {label:'標準問題',q:'電気設備の接地工事の種類と施設方法を述べよ',
+       a:`電気設備の接地工事は感電防止および機器保護を目的とする。接地工事の種類は以下のとおりである。
+
+（1）A種接地工事
+高圧または特別高圧の電気機器の外箱・支持物に施設する。接地抵抗値は10Ω以下。
+
+（2）B種接地工事
+高圧または特別高圧と低圧を結合する変圧器の低圧側中性点（またはそれに代わる1端子）に施設する。接地抵抗値は変圧器の高圧側地絡電流の値から算出する（原則として150÷地絡電流）。
+
+（3）C種接地工事
+300Vを超える低圧用電気機器の外箱・支持物に施設する。接地抵抗値は10Ω以下。
+
+（4）D種接地工事
+300V以下の低圧用電気機器の外箱・支持物に施設する。接地抵抗値は100Ω以下。`
+      }
+    ],
+    flashcards:[
+      {q:'接地工事A・B・C・Dの対象と抵抗値を述べよ',a:'A種：高圧機器外箱 → 10Ω以下\nB種：変圧器中性点 → 計算値（150÷地絡電流）\nC種：300V超低圧機器 → 10Ω以下\nD種：300V以下低圧機器 → 100Ω以下'},
+    ]
+  },
+  {
+    id:'t15', freq:'low', cat:'法規',
+    title:'自家用電気設備の保安規程・主任技術者',
+    tags:['法規','出題あり','現場直結'],
+    memory:'「電験三種＝5000kW未満の工場・ビルを管理できる」― 竹若さんの資格そのものの意義',
+    diagram:`<svg viewBox="0 0 460 140" width="460" height="140" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">電気主任技術者の選任と職務</text>
+      <rect x="5" y="28" width="200" height="100" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="105" y="50" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">選任の要件</text>
+      <text x="105" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">電験一種：制限なし</text>
+      <text x="105" y="87" text-anchor="middle" fill="#c9d1d9" font-size="10">電験二種：17万V未満</text>
+      <text x="105" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">電験三種：5万V未満</text>
+      <text x="105" y="118" text-anchor="middle" fill="#8b949e" font-size="10">（出力5000kW以上は二種以上）</text>
+      <rect x="255" y="28" width="200" height="100" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="355" y="50" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">主任技術者の職務</text>
+      <text x="355" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">保安規程の遵守</text>
+      <text x="355" y="87" text-anchor="middle" fill="#c9d1d9" font-size="10">工事・維持・運用の監督</text>
+      <text x="355" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">事業者への意見陳述権</text>
+      <text x="355" y="118" text-anchor="middle" fill="#8b949e" font-size="10">保安規程に基づく管理</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'電気主任技術者：事業用電気工作物の工事・維持・運用を監督する国家資格'},
+      {num:'②',text:'選任範囲：三種は5万V未満（出力5000kW未満）。二種は17万V未満。一種は制限なし'},
+      {num:'③',text:'保安規程：事業者が作成し経産省に届出。主任技術者はこれに基づき保安業務を実施'},
+      {num:'④',text:'主任技術者の権限：事業者への意見陳述権がある。保安上必要な事項を指示できる'},
+    ],
+    keywords:[
+      {word:'電気主任技術者',core:true},{word:'保安規程',core:true},{word:'事業用電気工作物',core:true},
+      {word:'選任',sub:true},{word:'外部委託',sub:true},{word:'意見陳述権',sub:true}
+    ],
+    template:'①制度の目的 → ②選任範囲（三種・二種・一種の違い） → ③保安規程の内容 → ④主任技術者の権限・義務',
+    answers:[
+      {label:'標準問題',q:'電気主任技術者制度の概要と保安規程について述べよ',
+       a:`電気主任技術者制度は事業用電気工作物の工事・維持・運用の保安を確保するための制度である。
+
+（1）電気主任技術者の選任
+事業用電気工作物を設置する事業者は、電気主任技術者を選任して保安の監督を行わせる義務がある。資格の種別と監督できる電圧範囲は以下のとおりである。
+・第一種電気主任技術者：制限なし
+・第二種電気主任技術者：電圧17万V未満
+・第三種電気主任技術者：電圧5万V未満（出力5,000kW以上の発電所は除く）
+
+（2）保安規程
+事業者は電気工作物の工事・維持・運用に関する保安規程を作成し、経済産業大臣（または産業保安監督部長）に届け出なければならない。保安規程には巡視・点検・検査の方法、災害対策等を定める。
+
+（3）主任技術者の権限
+主任技術者は事業者に対し保安のために必要な事項を意見として陳述する権限を有する。`
+      }
+    ],
+    flashcards:[
+      {q:'電験三種で監督できる電気工作物の電圧範囲は？',a:'電圧5万V未満（ただし出力5,000kW以上の発電所は二種以上が必要）'},
+      {q:'保安規程とは何か',a:'事業用電気工作物の工事・維持・運用に関する保安管理の規程。事業者が作成し経産省に届出が義務。巡視・点検・検査の方法等を定める'},
+    ]
+  },
+  {
+    id:'t16', freq:'high', cat:'送配電',
+    title:'中性点接地方式',
+    tags:['送配電','超頻出','地絡と絡む'],
+    memory:'「直接＝地絡大・通信障害大・迅速遮断。非接地＝地絡小・継続運転可」― 直接と非接地は対称的',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">中性点接地方式の比較</text>
+      <rect x="5" y="28" width="130" height="112" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="70" y="50" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">直接接地</text>
+      <text x="70" y="68" text-anchor="middle" fill="#c9d1d9" font-size="10">地絡電流：大</text>
+      <text x="70" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">健全相電圧：維持</text>
+      <text x="70" y="100" text-anchor="middle" fill="#8b949e" font-size="10">超高圧系統で採用</text>
+      <text x="70" y="116" text-anchor="middle" fill="#8b949e" font-size="10">迅速遮断が必要</text>
+      <rect x="148" y="28" width="130" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="213" y="50" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">抵抗接地</text>
+      <text x="213" y="68" text-anchor="middle" fill="#c9d1d9" font-size="10">地絡電流：中程度</text>
+      <text x="213" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">バランスがいい</text>
+      <text x="213" y="100" text-anchor="middle" fill="#8b949e" font-size="10">22kV・6kV系統</text>
+      <text x="213" y="116" text-anchor="middle" fill="#8b949e" font-size="10">で広く採用</text>
+      <rect x="291" y="28" width="182" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="382" y="50" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">非接地（消弧リアクトル含む）</text>
+      <text x="382" y="68" text-anchor="middle" fill="#c9d1d9" font-size="10">地絡電流：小</text>
+      <text x="382" y="84" text-anchor="middle" fill="#c9d1d9" font-size="10">健全相電圧：√3倍に</text>
+      <text x="382" y="100" text-anchor="middle" fill="#8b949e" font-size="10">一時的継続運転可</text>
+      <text x="382" y="116" text-anchor="middle" fill="#8b949e" font-size="10">絶縁レベル高く設計要</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'直接接地：中性点を直接大地に接続。地絡電流は大きいが健全相電圧上昇は小。超高圧（187kV以上）で採用'},
+      {num:'②',text:'抵抗接地：中性点に抵抗を挿入。地絡電流を制限しつつ故障検出も可能。22kV・6kV系統で広く採用'},
+      {num:'③',text:'非接地：中性点を接地しない。地絡電流は充電電流のみ小さい。ただし健全相電圧が√3倍に上昇'},
+      {num:'④',text:'消弧リアクトル接地：リアクトルで充電電流を相殺し地絡を自然消弧させる'},
+    ],
+    keywords:[
+      {word:'直接接地',core:true},{word:'抵抗接地',core:true},{word:'非接地',core:true},
+      {word:'中性点',core:true},{word:'健全相電圧',core:true},
+      {word:'消弧リアクトル',sub:true},{word:'地絡電流',sub:true},{word:'零相電圧',sub:true}
+    ],
+    template:'①各方式の接地方法を説明 → ②地絡電流の大きさ・健全相電圧の変化を比較 → ③採用される電圧階級と理由',
+    answers:[
+      {label:'標準問題',q:'電力系統の中性点接地方式の種類と特徴を述べよ',
+       a:`電力系統の中性点接地方式は地絡事故時の電流・電圧特性により以下に分類される。
+
+（1）直接接地方式
+変圧器中性点を直接大地に接続する方式。地絡電流は大きくなるが、健全相の電圧上昇が抑制されるため機器の絶縁レベルを低減できる。187kV以上の超高圧系統で採用され、地絡時の迅速な遮断が必要である。
+
+（2）抵抗接地方式
+中性点に抵抗を挿入する方式。地絡電流を適度に制限しつつ故障検出が容易なことから、22kVや6kVの配電系統で広く採用されている。
+
+（3）非接地方式
+中性点を接地しない方式。地絡電流は対地充電電流のみと小さく、一時的な継続運転が可能。ただし一線地絡時に健全相電圧が線間電圧（√3倍）に上昇するため、機器の絶縁レベルを高く設計する必要がある。`
+      },
+      {label:'消弧リアクトル',q:'消弧リアクトル接地方式の原理と特徴を述べよ',
+       a:`消弧リアクトル接地方式（ペーターゼンコイル方式）は、中性点を消弧リアクトルを介して接地する方式である。
+
+（1）原理
+一線地絡時には、対地静電容量を通じて流れる進み位相の充電電流と、消弧リアクトルを流れる遅れ位相の電流が逆位相となる。両者を共振させて打ち消すことで地絡電流をほぼゼロにする。
+
+（2）特徴
+・地絡電流が極めて小さく、アークが自然消弧するため瞬時地絡では停電に至らない。
+・通信線への誘導障害が小さい。
+・継続運転が可能で供給信頼度が高い。
+
+（3）欠点
+・地絡継電器の動作が難しく、地絡点の検出・選択遮断が困難である。
+・系統の対地静電容量の変化に合わせてリアクトルの調整が必要である。
+
+主に特別高圧の架空送電線系統で採用されてきた。`
+      },
+      {label:'選定の考え方',q:'中性点接地方式を電圧階級に応じて選定する考え方を述べよ',
+       a:`中性点接地方式は、地絡電流の大きさ・健全相電圧の上昇・通信障害・保護の容易さなどを総合的に勘案して選定する。
+
+（1）超高圧系統（187kV以上）
+直接接地方式を採用する。理由は、健全相の電圧上昇を抑えられるため機器の絶縁レベルを低減でき、超高圧では絶縁コストの削減効果が大きいためである。地絡電流は大きいが高速遮断で対応する。
+
+（2）高圧・特別高圧系統（66〜154kV）
+抵抗接地方式が多い。地絡電流を適度に制限しつつ確実な地絡検出を可能にするバランスの取れた方式である。
+
+（3）配電系統（6.6kV）
+非接地方式が一般的である。地絡電流が小さく、一線地絡時にも短時間の継続運転が可能で供給信頼度が高い。
+
+このように、絶縁コストの削減効果が大きい高電圧ほど直接接地が、供給継続性を重視する低電圧側ほど非接地が選ばれる傾向にある。`
+      }
+    ],
+    flashcards:[
+      {q:'直接接地と非接地の地絡時の違いを比較せよ',a:'直接接地：地絡電流大・健全相電圧維持・超高圧で採用\n非接地：地絡電流小・健全相電圧√3倍に上昇・絶縁レベルを高く要する'},
+      {q:'非接地方式で健全相電圧が上昇する理由を述べよ',a:'一線地絡時に中性点電位が変化し、健全な2相の対地電圧が線間電圧（√3倍）まで上昇するため'},
+      {q:'消弧リアクトル接地の原理を述べよ',a:'地絡時の充電電流（進み）とリアクトル電流（遅れ）を共振で打ち消し、地絡電流をほぼゼロにしてアークを自然消弧させる'},
+      {q:'超高圧系統で直接接地が採用される理由は？',a:'健全相の電圧上昇を抑えられ機器の絶縁レベルを低減できるため。超高圧では絶縁コスト削減効果が大きい'},
+    ]
+  },
+  {
+    id:'t17', freq:'mid', cat:'発変電',
+    title:'同期発電機の特性と並行運転',
+    tags:['発変電','頻出','計算混合'],
+    memory:'「並行運転の条件は4つ：電圧・周波数・位相・波形」― 一つでもずれると突入電流',
+    diagram:`<svg viewBox="0 0 460 145" width="460" height="145" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">並行運転の4条件</text>
+      <rect x="5" y="28" width="105" height="105" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="57" y="55" text-anchor="middle" fill="#e8a838" font-size="20" font-weight="bold">V</text>
+      <text x="57" y="76" text-anchor="middle" fill="#c9d1d9" font-size="11">電圧の</text>
+      <text x="57" y="92" text-anchor="middle" fill="#c9d1d9" font-size="11">大きさが等しい</text>
+      <text x="57" y="110" text-anchor="middle" fill="#8b949e" font-size="10">AVRで調整</text>
+      <rect x="122" y="28" width="105" height="105" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="174" y="55" text-anchor="middle" fill="#58a6ff" font-size="20" font-weight="bold">f</text>
+      <text x="174" y="76" text-anchor="middle" fill="#c9d1d9" font-size="11">周波数が等しい</text>
+      <text x="174" y="92" text-anchor="middle" fill="#c9d1d9" font-size="11">調速機で調整</text>
+      <text x="174" y="110" text-anchor="middle" fill="#8b949e" font-size="10">ガバナ制御</text>
+      <rect x="239" y="28" width="105" height="105" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="291" y="55" text-anchor="middle" fill="#3fb950" font-size="20" font-weight="bold">φ</text>
+      <text x="291" y="76" text-anchor="middle" fill="#c9d1d9" font-size="11">位相が等しい</text>
+      <text x="291" y="92" text-anchor="middle" fill="#c9d1d9" font-size="11">同期検定器で確認</text>
+      <text x="291" y="110" text-anchor="middle" fill="#8b949e" font-size="10">投入時が最重要</text>
+      <rect x="356" y="28" width="100" height="105" rx="8" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="406" y="55" text-anchor="middle" fill="#bc8cff" font-size="15" font-weight="bold">波形</text>
+      <text x="406" y="76" text-anchor="middle" fill="#c9d1d9" font-size="11">波形が等しい</text>
+      <text x="406" y="92" text-anchor="middle" fill="#c9d1d9" font-size="11">（正弦波）</text>
+      <text x="406" y="110" text-anchor="middle" fill="#8b949e" font-size="10">高調波に注意</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'並行運転の4条件：①電圧の大きさが等しい②周波数が等しい③位相が等しい④波形が等しい'},
+      {num:'②',text:'位相が合っていないと大きな横流（循環電流）が流れ機器を損傷する。同期検定器で確認してから投入'},
+      {num:'③',text:'有効電力の分担：調速機（ガバナ）特性で決まる。速度垂下率が等しければ並行運転が安定'},
+      {num:'④',text:'無効電力の分担：AVR（自動電圧調整器）特性で決まる。励磁電流の調整で分担が変わる'},
+    ],
+    keywords:[
+      {word:'並行運転の条件',core:true},{word:'同期検定器',core:true},{word:'横流（循環電流）',core:true},
+      {word:'調速機（ガバナ）',sub:true},{word:'AVR',sub:true},{word:'速度垂下率',sub:true}
+    ],
+    template:'①並行運転の4条件を列挙 → ②各条件が満たされない場合の影響 → ③有効電力・無効電力の分担制御',
+    answers:[
+      {label:'標準問題',q:'同期発電機の並行運転の条件と注意事項を述べよ',
+       a:`同期発電機を並行運転するためには以下の4条件を満たす必要がある。
+
+（1）並行運転の4条件
+・起電力の大きさが等しいこと（AVRにより調整）
+・周波数が等しいこと（調速機により調整）
+・位相が等しいこと（同期検定器で確認して投入）
+・波形が等しいこと（正弦波）
+
+（2）条件不一致時の影響
+位相が一致していない状態で系統に投入すると、大きな横流（循環電流）が流れ機器の損傷を招く。このため同期検定器を用いて位相の一致を確認してから投入する。
+
+（3）負荷分担の制御
+有効電力の分担は調速機（ガバナ）の速度垂下特性により決まり、無効電力の分担はAVRの電圧特性により決まる。安定した並行運転には各機の特性を整合させることが重要である。`
+      }
+    ],
+    flashcards:[
+      {q:'同期発電機の並行運転の4条件を述べよ',a:'①電圧の大きさが等しい\n②周波数が等しい\n③位相が等しい\n④波形が等しい（正弦波）'},
+      {q:'並行運転で位相がずれていた場合に起こることは？',a:'大きな横流（循環電流）が流れ、発電機・変圧器等の機器に損傷を与える'},
+    ]
+  },
+  {
+    id:'t18', freq:'mid', cat:'送配電',
+    title:'直流送電とHVDC',
+    tags:['送配電','頻出','近年増加'],
+    memory:'「交流はリアクタンス問題、直流はそれがない」― 長距離・海底・系統連系で直流が有利な理由',
+    diagram:`<svg viewBox="0 0 460 145" width="460" height="145" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">直流送電（HVDC）の特徴</text>
+      <rect x="5" y="28" width="200" height="108" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="105" y="50" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="bold">直流送電の利点</text>
+      <text x="105" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">・リアクタンスがない → 安定度問題なし</text>
+      <text x="105" y="87" text-anchor="middle" fill="#c9d1d9" font-size="10">・充電電流なし → 海底ケーブルに適</text>
+      <text x="105" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">・周波数が異なる系統を連系可能</text>
+      <text x="105" y="120" text-anchor="middle" fill="#c9d1d9" font-size="10">・潮流を正確に制御できる</text>
+      <rect x="255" y="28" width="200" height="108" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="355" y="50" text-anchor="middle" fill="#f85149" font-size="12" font-weight="bold">直流送電の欠点</text>
+      <text x="355" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">・変換設備（コンバータ）が高価</text>
+      <text x="355" y="87" text-anchor="middle" fill="#c9d1d9" font-size="10">・高調波が発生しフィルタが必要</text>
+      <text x="355" y="104" text-anchor="middle" fill="#c9d1d9" font-size="10">・多端子化が交流より困難</text>
+      <text x="355" y="120" text-anchor="middle" fill="#c9d1d9" font-size="10">・変圧器で簡単に昇降圧できない</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'HVDC（高電圧直流送電）：交流を整流して直流で送電し、受電端で再び交流に変換'},
+      {num:'②',text:'利点：リアクタンスがないため安定度問題なし。充電電流が流れないため長距離・海底ケーブルに最適'},
+      {num:'③',text:'利点続：異周波数系統（50Hz/60Hz）の連系が可能。潮流を正確に制御できる'},
+      {num:'④',text:'欠点：整流・逆変換設備が高価。高調波発生によりフィルタ設備が必要'},
+    ],
+    keywords:[
+      {word:'HVDC',core:true},{word:'整流器',core:true},{word:'逆変換器（インバータ）',core:true},
+      {word:'リアクタンス',sub:true},{word:'充電電流',sub:true},{word:'非同期連系',sub:true}
+    ],
+    template:'①直流送電の原理（整流→直流送電→逆変換） → ②利点（安定度・海底・非同期連系） → ③欠点（変換設備コスト・高調波）',
+    answers:[
+      {label:'標準問題',q:'直流送電（HVDC）の特徴と交流送電との比較を述べよ',
+       a:`直流送電（HVDC：High Voltage Direct Current）は交流を整流して直流で長距離送電し、受電端で逆変換して交流に戻す方式である。
+
+利点：
+（1）安定度上の問題がない。直流送電線にはリアクタンスが存在しないため、交流系統で問題となる安定度の制約を受けない。
+（2）長距離・海底ケーブル送電に適する。直流では充電電流が流れないため、交流ケーブルで問題となるフェランチ効果や充電容量の制約がない。
+（3）非同期系統の連系が可能。50Hz系統と60Hz系統など、周波数の異なる系統を直流を介して連系できる。
+（4）潮流制御が容易。コンバータの制御により送電電力を精密に制御できる。
+
+欠点：
+・整流設備・逆変換設備が高価であること。
+・変換装置から高調波が発生しフィルタ設備が必要なこと。
+・変圧器のように簡単に電圧変換ができないこと。`
+      }
+    ],
+    flashcards:[
+      {q:'直流送電が長距離・海底ケーブルに適する理由を述べよ',a:'充電電流が流れないため、交流ケーブルで問題となる充電容量の制約やフェランチ効果を受けない'},
+      {q:'直流送電の欠点を2つ挙げよ',a:'①整流・逆変換設備（コンバータ）が高価\n②高調波が発生するためフィルタ設備が必要'},
+    ]
+  },
+  {
+    id:'t19', freq:'high', cat:'送配電',
+    title:'調相設備と無効電力制御',
+    tags:['送配電','超頻出','電圧管理と連動'],
+    memory:'「進相コンデンサは進み、分路リアクトルは遅れ、調相機・SVCは両方」― 軽負荷か重負荷かで使い分け',
+    diagram:`<svg viewBox="0 0 480 150" width="480" height="150" style="font-family:sans-serif">
+      <text x="240" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">調相設備の使い分け</text>
+      <rect x="5" y="28" width="115" height="112" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="62" y="50" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">進相コンデンサ</text>
+      <text x="62" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">進み無効電力</text>
+      <text x="62" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">を供給</text>
+      <text x="62" y="103" text-anchor="middle" fill="#8b949e" font-size="10">重負荷時</text>
+      <text x="62" y="118" text-anchor="middle" fill="#8b949e" font-size="10">電圧降下を改善</text>
+      <rect x="128" y="28" width="115" height="112" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="185" y="50" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">分路リアクトル</text>
+      <text x="185" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">遅れ無効電力</text>
+      <text x="185" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">を吸収</text>
+      <text x="185" y="103" text-anchor="middle" fill="#8b949e" font-size="10">軽負荷時</text>
+      <text x="185" y="118" text-anchor="middle" fill="#8b949e" font-size="10">フェランチ対策</text>
+      <rect x="251" y="28" width="110" height="112" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="306" y="50" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">同期調相機</text>
+      <text x="306" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">励磁を変えて</text>
+      <text x="306" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">進み・遅れ両用</text>
+      <text x="306" y="103" text-anchor="middle" fill="#8b949e" font-size="10">連続調整可</text>
+      <text x="306" y="118" text-anchor="middle" fill="#8b949e" font-size="10">回転機・損失大</text>
+      <rect x="369" y="28" width="106" height="112" rx="8" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="422" y="50" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="bold">SVC</text>
+      <text x="422" y="70" text-anchor="middle" fill="#c9d1d9" font-size="10">半導体で</text>
+      <text x="422" y="86" text-anchor="middle" fill="#c9d1d9" font-size="10">高速連続制御</text>
+      <text x="422" y="103" text-anchor="middle" fill="#8b949e" font-size="10">進み・遅れ両用</text>
+      <text x="422" y="118" text-anchor="middle" fill="#8b949e" font-size="10">静止型・高速</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'調相設備の目的：無効電力を供給・吸収して電圧を適正範囲に維持し、力率を改善する'},
+      {num:'②',text:'進相コンデンサ：進み無効電力を供給。重負荷時の電圧降下を改善。段階的な投入'},
+      {num:'③',text:'分路リアクトル：遅れ無効電力を吸収。軽負荷時のフェランチ効果による電圧上昇を抑制'},
+      {num:'④',text:'同期調相機・SVC・STATCOM：進み遅れ両方を連続制御。SVC以降は静止型で高速応答'},
+    ],
+    keywords:[
+      {word:'進相コンデンサ',core:true},{word:'分路リアクトル',core:true},{word:'同期調相機',core:true},
+      {word:'SVC',core:true},{word:'無効電力',core:true},
+      {word:'STATCOM',sub:true},{word:'力率改善',sub:true},{word:'電圧維持',sub:true}
+    ],
+    template:'①調相設備の目的（無効電力と電圧の関係） → ②各設備を進み・遅れ・両用で分類 → ③応答速度と適用場面の比較',
+    answers:[
+      {label:'標準問題',q:'調相設備の種類と特徴を述べよ',
+       a:`調相設備は無効電力を調整して系統電圧を適正に維持し力率を改善する設備である。
+
+（1）電力用コンデンサ（進相コンデンサ）
+進み無効電力を供給し、重負荷時の電圧降下を抑制する。構造が簡単で安価だが、無効電力の調整は段階的（バンク単位の投入・解列）となる。
+
+（2）分路リアクトル
+遅れ無効電力を吸収し、軽負荷時や長距離送電線の充電電流によるフェランチ効果（電圧上昇）を抑制する。
+
+（3）同期調相機
+無負荷運転の同期電動機で、励磁電流を調整することで進み・遅れ両方の無効電力を連続的に供給・吸収できる。ただし回転機であり損失・保守の負担が大きい。
+
+（4）静止型無効電力補償装置（SVC）・STATCOM
+電力用半導体を用いて無効電力を連続的かつ高速に制御する。可動部がなく応答が速いため、近年は同期調相機に代わって普及している。`
+      },
+      {label:'力率改善効果',q:'進相コンデンサによる力率改善の効果を述べよ',
+       a:`力率改善とは、遅れ力率の負荷に進相コンデンサを並列接続し、無効電力を補償することをいう。その効果は以下のとおりである。
+
+（1）電力損失の低減
+線路電流が減少するため、I²Rの損失が低減する。
+
+（2）電圧降下の改善
+無効電流による電圧降下が減少し、受電端電圧が改善する。
+
+（3）設備容量の余裕増加
+変圧器・線路を流れる皮相電力が減少するため、設備の容量に余裕が生まれ、より多くの有効電力を供給できる。
+
+（4）電気料金の低減
+電力会社の力率割引制度により基本料金が低減する。
+
+なお、コンデンサ容量が過大だと進み力率となり、軽負荷時に電圧上昇を招くため、負荷に応じた適切な容量選定と自動力率調整が必要である。`
+      }
+    ],
+    flashcards:[
+      {q:'進相コンデンサと分路リアクトルの役割の違いを述べよ',a:'進相コンデンサ：進み無効電力を供給→重負荷時の電圧降下を改善\n分路リアクトル：遅れ無効電力を吸収→軽負荷時の電圧上昇（フェランチ）を抑制'},
+      {q:'同期調相機とSVCの違いを述べよ',a:'同期調相機：回転機で進み遅れ両用だが損失・保守負担が大\nSVC：半導体による静止型で高速連続制御、可動部なし'},
+      {q:'力率改善の効果を3つ挙げよ',a:'①線路電流減少による損失低減\n②電圧降下の改善\n③設備容量に余裕（皮相電力減少）。加えて電気料金の力率割引'},
+    ]
+  },
+  {
+    id:'t20', freq:'high', cat:'送配電',
+    title:'絶縁協調と避雷対策',
+    tags:['送配電','超頻出','BIL'],
+    memory:'「絶縁協調＝避雷器で頭を押さえ、機器の絶縁をその下に置く」― 避雷器の制限電圧＜機器のBIL',
+    diagram:`<svg viewBox="0 0 460 155" width="460" height="155" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">絶縁協調の考え方</text>
+      <line x1="40" y1="135" x2="420" y2="135" stroke="#30363d" stroke-width="1"/>
+      <rect x="60" y="40" width="80" height="95" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="100" y="32" text-anchor="middle" fill="#f85149" font-size="10">雷サージ</text>
+      <text x="100" y="90" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">最大</text>
+      <rect x="180" y="70" width="80" height="65" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="220" y="62" text-anchor="middle" fill="#e8a838" font-size="10">避雷器</text>
+      <text x="220" y="105" text-anchor="middle" fill="#e8a838" font-size="10" font-weight="bold">制限電圧</text>
+      <rect x="300" y="55" width="80" height="80" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="340" y="47" text-anchor="middle" fill="#3fb950" font-size="10">機器絶縁</text>
+      <text x="340" y="95" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="bold">BIL</text>
+      <text x="230" y="152" text-anchor="middle" fill="#8b949e" font-size="10">避雷器の制限電圧 ＜ 機器のBIL となるよう協調をとる</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'絶縁協調：系統の各機器の絶縁強度を経済的・合理的に協調させ、事故を限定する考え方'},
+      {num:'②',text:'雷サージ・開閉サージなどの異常電圧の大きさを把握する'},
+      {num:'③',text:'避雷器を設置して異常電圧を制限電圧以下に抑える（頭を押さえる）'},
+      {num:'④',text:'機器の基準衝撃絶縁強度（BIL）を避雷器の制限電圧より高く設定し、機器を保護する'},
+    ],
+    keywords:[
+      {word:'絶縁協調',core:true},{word:'BIL（基準衝撃絶縁強度）',core:true},{word:'避雷器',core:true},
+      {word:'制限電圧',core:true},{word:'雷サージ',core:true},
+      {word:'酸化亜鉛形避雷器',sub:true},{word:'開閉サージ',sub:true},{word:'架空地線',sub:true}
+    ],
+    template:'①絶縁協調の定義・目的 → ②異常電圧の種類 → ③避雷器による電圧制限 → ④BILとの関係（協調の条件）',
+    answers:[
+      {label:'標準問題',q:'絶縁協調の考え方と避雷器の役割を述べよ',
+       a:`絶縁協調とは、電力系統を構成する各機器・設備の絶縁強度を、技術的・経済的に最も合理的となるよう相互に協調させることをいう。
+
+（1）目的
+系統に加わる異常電圧（雷サージ・開閉サージ）に対し、絶縁破壊を特定の箇所（避雷器）に限定し、重要機器の絶縁を保護する。すべての機器の絶縁を最大の異常電圧に耐えるよう設計するのは不経済であるため、避雷器で電圧を制限したうえで機器の絶縁レベルを定める。
+
+（2）避雷器の役割
+避雷器は、異常電圧が侵入した際に動作して大地へ放電し、機器に加わる電圧を制限電圧以下に抑える。電圧が正常に戻ると速やかに絶縁を回復し、続流を遮断する。現在は非直線抵抗特性に優れた酸化亜鉛形（ZnO）避雷器が主流である。
+
+（3）協調の条件
+避雷器の制限電圧が、保護対象機器の基準衝撃絶縁強度（BIL）より十分低くなるよう設定する。これにより避雷器が先に動作し機器を保護できる。`
+      }
+    ],
+    flashcards:[
+      {q:'絶縁協調とは何か',a:'各機器の絶縁強度を経済的・合理的に協調させ、絶縁破壊を避雷器に限定して重要機器を保護する考え方'},
+      {q:'絶縁協調の条件（避雷器とBILの関係）を述べよ',a:'避雷器の制限電圧 ＜ 機器のBIL（基準衝撃絶縁強度）。避雷器が先に動作して機器を守る'},
+      {q:'現在主流の避雷器の種類と特徴は？',a:'酸化亜鉛形（ZnO）避雷器。非直線抵抗特性に優れ、続流の遮断性能が高い'},
+    ]
+  },
+  {
+    id:'t21', freq:'mid', cat:'送配電',
+    title:'電力ケーブルの種類と劣化診断',
+    tags:['送配電','頻出','CVケーブル'],
+    memory:'「CVケーブルの大敵は水トリー」― 地中送電の劣化はほぼこれ',
+    diagram:`<svg viewBox="0 0 470 150" width="470" height="150" style="font-family:sans-serif">
+      <text x="235" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">CVケーブルの劣化と診断</text>
+      <rect x="5" y="30" width="150" height="110" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="80" y="52" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">主な劣化要因</text>
+      <text x="80" y="72" text-anchor="middle" fill="#c9d1d9" font-size="10">・水トリー（最重要）</text>
+      <text x="80" y="89" text-anchor="middle" fill="#c9d1d9" font-size="10">・電気トリー</text>
+      <text x="80" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">・熱劣化</text>
+      <text x="80" y="123" text-anchor="middle" fill="#c9d1d9" font-size="10">・外傷・浸水</text>
+      <rect x="165" y="30" width="150" height="110" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="240" y="52" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">診断手法</text>
+      <text x="240" y="72" text-anchor="middle" fill="#c9d1d9" font-size="10">・直流漏れ電流法</text>
+      <text x="240" y="89" text-anchor="middle" fill="#c9d1d9" font-size="10">・tanδ測定</text>
+      <text x="240" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">・部分放電測定</text>
+      <text x="240" y="123" text-anchor="middle" fill="#c9d1d9" font-size="10">・残留電荷法</text>
+      <rect x="325" y="30" width="140" height="110" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="395" y="52" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">CVケーブル構造</text>
+      <text x="395" y="72" text-anchor="middle" fill="#c9d1d9" font-size="10">導体</text>
+      <text x="395" y="89" text-anchor="middle" fill="#c9d1d9" font-size="10">＋架橋ポリエチレン</text>
+      <text x="395" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">　絶縁体</text>
+      <text x="395" y="123" text-anchor="middle" fill="#c9d1d9" font-size="10">＋遮へい・シース</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'CVケーブル（架橋ポリエチレン絶縁ビニルシースケーブル）：地中送配電の主流。耐熱性・絶縁性に優れる'},
+      {num:'②',text:'最大の劣化要因は水トリー：絶縁体中に水分が侵入し電界で樹枝状の劣化が進行する'},
+      {num:'③',text:'その他の劣化：電気トリー（部分放電が起点）、熱劣化、外傷・浸水'},
+      {num:'④',text:'診断：直流漏れ電流法、tanδ測定、部分放電測定、残留電荷法などで劣化を把握'},
+    ],
+    keywords:[
+      {word:'CVケーブル',core:true},{word:'水トリー',core:true},{word:'架橋ポリエチレン',core:true},
+      {word:'部分放電',core:true},{word:'tanδ測定',core:true},
+      {word:'電気トリー',sub:true},{word:'直流漏れ電流法',sub:true},{word:'シース',sub:true}
+    ],
+    template:'①ケーブルの種類・構造 → ②劣化要因（水トリーを中心に） → ③診断手法の列挙',
+    answers:[
+      {label:'標準問題',q:'電力ケーブルの劣化要因と診断方法を述べよ',
+       a:`現在の地中送配電にはCVケーブル（架橋ポリエチレン絶縁ビニルシースケーブル）が広く用いられている。その劣化要因と診断方法を述べる。
+
+（1）主な劣化要因
+・水トリー：絶縁体である架橋ポリエチレン中に水分が侵入し、電界の作用で樹枝状（トリー状）の微小な劣化経路が進展する。CVケーブル特有かつ最も重要な劣化形態である。
+・電気トリー：絶縁体内のボイドや異物での部分放電を起点に進展する。
+・熱劣化：過負荷や周囲温度上昇による化学的劣化。
+・外傷・浸水：施工不良や外力による損傷。
+
+（2）診断方法
+・直流漏れ電流法：直流電圧を印加し漏れ電流から絶縁状態を判定する。
+・誘電正接（tanδ）測定：絶縁体全体の劣化度を評価する。
+・部分放電測定：内部欠陥や電気トリーを検出する。
+・残留電荷法・直流成分法：水トリー劣化の検出に有効である。
+
+これらにより劣化を定量把握し、計画的な更新につなげる。`
+      }
+    ],
+    flashcards:[
+      {q:'CVケーブルの最も重要な劣化要因は？',a:'水トリー：絶縁体（架橋ポリエチレン）中に水分が侵入し、電界の作用で樹枝状の劣化が進展する'},
+      {q:'水トリーと電気トリーの違いを述べよ',a:'水トリー：水分の侵入が起点\n電気トリー：絶縁体内のボイド・異物での部分放電が起点'},
+      {q:'CVケーブルとは何の略か、構造を述べよ',a:'架橋ポリエチレン絶縁ビニルシースケーブル。導体＋架橋ポリエチレン絶縁体＋遮へい層＋ビニルシース'},
+    ]
+  },
+  {
+    id:'t22', freq:'mid', cat:'発変電',
+    title:'ガス絶縁開閉装置（GIS）',
+    tags:['発変電','頻出','SF6'],
+    memory:'「GISはSF₆ガスで小型化」― 都市部・狭隘地で気中式に代わって主流に',
+    diagram:`<svg viewBox="0 0 460 145" width="460" height="145" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">GIS（ガス絶縁開閉装置）の特徴</text>
+      <rect x="5" y="30" width="220" height="105" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="115" y="52" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="bold">利点</text>
+      <text x="115" y="72" text-anchor="middle" fill="#c9d1d9" font-size="10">・大幅な小型化（気中式の1/3〜1/10）</text>
+      <text x="115" y="89" text-anchor="middle" fill="#c9d1d9" font-size="10">・充電部が密閉され安全・高信頼</text>
+      <text x="115" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">・塩害・塵埃の影響を受けない</text>
+      <text x="115" y="123" text-anchor="middle" fill="#c9d1d9" font-size="10">・保守が少なく長寿命</text>
+      <rect x="235" y="30" width="220" height="105" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="345" y="52" text-anchor="middle" fill="#f85149" font-size="12" font-weight="bold">欠点・課題</text>
+      <text x="345" y="72" text-anchor="middle" fill="#c9d1d9" font-size="10">・SF₆は強力な温室効果ガス</text>
+      <text x="345" y="89" text-anchor="middle" fill="#c9d1d9" font-size="10">・内部故障の発見・修理が困難</text>
+      <text x="345" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">・初期コストが高い</text>
+      <text x="345" y="123" text-anchor="middle" fill="#c9d1d9" font-size="10">・ガス漏れ管理が必要</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'GIS：遮断器・断路器・母線などを金属容器に収め、SF₆ガスで絶縁した装置'},
+      {num:'②',text:'利点：SF₆の高絶縁性により大幅な小型化が可能。都市部や狭隘地に適する'},
+      {num:'③',text:'利点続：充電部が密閉され塩害・塵埃の影響を受けず、保守が少なく信頼性が高い'},
+      {num:'④',text:'課題：SF₆は強力な温室効果ガス（CO₂の約2万倍）であり、漏洩防止・回収が求められる'},
+    ],
+    keywords:[
+      {word:'GIS',core:true},{word:'SF₆ガス',core:true},{word:'小型化',core:true},
+      {word:'温室効果ガス',core:true},
+      {word:'遮断器',sub:true},{word:'断路器',sub:true},{word:'部分放電',sub:true}
+    ],
+    template:'①GISの定義・構成 → ②利点（小型化・高信頼・耐環境） → ③課題（SF₆の環境問題・修理性）',
+    answers:[
+      {label:'標準問題',q:'ガス絶縁開閉装置（GIS）の特徴と利点・課題を述べよ',
+       a:`ガス絶縁開閉装置（GIS：Gas Insulated Switchgear）は、遮断器・断路器・母線・避雷器などを接地された金属容器に収納し、絶縁性能の高いSF₆ガスを充填した装置である。
+
+（1）利点
+・小型化：SF₆ガスの高い絶縁性能により、従来の気中絶縁式に比べ設置面積を大幅に縮小できる。都市部の変電所や狭隘地に適する。
+・高信頼性：充電部が密閉容器内にあるため、塩害・塵埃・湿気などの外部環境の影響を受けず、安全性・信頼性が高い。
+・保守の軽減：密閉構造のため保守頻度が少なく長寿命である。
+
+（2）課題
+・SF₆ガスは地球温暖化係数がCO₂の約2万倍と極めて高い温室効果ガスであり、漏洩防止・回収・再利用の管理が必要である。代替ガスの開発も進められている。
+・内部故障時の発見・修理が気中式に比べて困難である。
+・部分放電などの内部異常を監視する診断技術が重要となる。`
+      }
+    ],
+    flashcards:[
+      {q:'GISが小型化できる理由は？',a:'絶縁性能の高いSF₆ガスを充填しているため、気中絶縁式より絶縁距離を大幅に短縮でき、設置面積を縮小できる'},
+      {q:'GISの環境上の課題は？',a:'絶縁に使うSF₆ガスが地球温暖化係数CO₂の約2万倍の強力な温室効果ガスであり、漏洩防止・回収管理が必要'},
+      {q:'GISの利点を3つ挙げよ',a:'①大幅な小型化（都市部・狭隘地向け）\n②密閉構造で塩害・塵埃に強く高信頼\n③保守が少なく長寿命'},
+    ]
+  },
+  {
+    id:'t23', freq:'mid', cat:'施設管理',
+    title:'力率改善の経済効果と進相設備',
+    tags:['施設管理','頻出','現場直結'],
+    memory:'「力率を上げると基本料金が下がり、損失も減る」― 需要家にとっての直接メリット',
+    diagram:`<svg viewBox="0 0 440 150" width="440" height="150" style="font-family:sans-serif">
+      <text x="220" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">力率改善の効果（需要家視点）</text>
+      <line x1="60" y1="120" x2="240" y2="120" stroke="#8b949e" stroke-width="1.5"/>
+      <line x1="60" y1="120" x2="60" y2="50" stroke="#58a6ff" stroke-width="1.5"/>
+      <line x1="60" y1="50" x2="240" y2="120" stroke="#e8a838" stroke-width="2"/>
+      <line x1="60" y1="80" x2="180" y2="120" stroke="#3fb950" stroke-width="2" stroke-dasharray="4"/>
+      <text x="150" y="135" fill="#8b949e" font-size="10">有効電力 P</text>
+      <text x="30" y="88" fill="#58a6ff" font-size="10">無効</text>
+      <text x="30" y="100" fill="#58a6ff" font-size="10">電力Q</text>
+      <text x="160" y="78" fill="#e8a838" font-size="10" transform="rotate(22 160 78)">改善前S</text>
+      <text x="115" y="95" fill="#3fb950" font-size="10" transform="rotate(18 115 95)">改善後S'</text>
+      <text x="345" y="55" text-anchor="middle" fill="#f0f6fc" font-size="11" font-weight="bold">効果</text>
+      <text x="345" y="75" text-anchor="middle" fill="#c9d1d9" font-size="10">皮相電力S↓</text>
+      <text x="345" y="92" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 基本料金↓</text>
+      <text x="345" y="109" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 損失↓</text>
+      <text x="345" y="126" text-anchor="middle" fill="#c9d1d9" font-size="10">→ 容量余裕↑</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'力率＝有効電力P/皮相電力S。遅れ力率の負荷に進相コンデンサで無効電力を補償する'},
+      {num:'②',text:'経済効果1：電力会社の力率割引制度により基本料金が低減する（力率85%基準で増減）'},
+      {num:'③',text:'経済効果2：線路電流が減り損失（I²R）が低減。電圧降下も改善される'},
+      {num:'④',text:'経済効果3：皮相電力が減り変圧器・線路の容量に余裕が生まれる'},
+    ],
+    keywords:[
+      {word:'力率',core:true},{word:'進相コンデンサ',core:true},{word:'皮相電力',core:true},
+      {word:'力率割引',core:true},{word:'無効電力',core:true},
+      {word:'直列リアクトル',sub:true},{word:'自動力率調整',sub:true},{word:'基本料金',sub:true}
+    ],
+    template:'①力率の定義と改善方法 → ②経済効果を3点（基本料金・損失・容量） → ③過補償の注意（進み力率の弊害）',
+    answers:[
+      {label:'標準問題',q:'需要家における力率改善の意義と経済効果を述べよ',
+       a:`力率改善とは、遅れ力率の負荷に進相コンデンサを並列に接続して無効電力を補償し、力率を1に近づけることをいう。
+
+（1）経済効果
+・基本料金の低減：電力会社の契約では力率85%を基準に、これより高ければ基本料金が割引され、低ければ割増される。力率改善により基本料金を低減できる。
+・電力損失の低減：力率改善により線路電流が減少し、I²Rの損失が低減する。
+・電圧降下の改善：無効電流による電圧降下が減少し受電端電圧が改善する。
+・設備容量の余裕増加：皮相電力が減少するため、変圧器・配線の容量に余裕が生まれる。
+
+（2）進相設備の構成
+進相コンデンサには高調波対策として直列リアクトルを接続する。また負荷変動に応じて自動力率調整装置でコンデンサを投入・解列する。
+
+（3）過補償への注意
+コンデンサ容量が過大だと軽負荷時に進み力率となり、かえって電圧上昇や損失増加を招くため、適切な容量選定が必要である。`
+      }
+    ],
+    flashcards:[
+      {q:'力率改善による需要家の経済効果を3つ挙げよ',a:'①基本料金の低減（力率割引）\n②電力損失の低減（線路電流減少）\n③設備容量の余裕増加（皮相電力減少）'},
+      {q:'進相コンデンサの過補償（容量過大）で起こる弊害は？',a:'軽負荷時に進み力率となり、電圧上昇や損失増加を招く。適切な容量選定と自動調整が必要'},
+      {q:'進相コンデンサに直列リアクトルを付ける目的は？',a:'高調波の流入・拡大を防ぎ、コンデンサの過熱・焼損を防止するため'},
+    ]
+  },
+  {
+    id:'t24', freq:'mid', cat:'施設管理',
+    title:'短絡容量と遮断容量',
+    tags:['施設管理','頻出','%Z'],
+    memory:'「短絡容量＝系統の事故の激しさ、遮断容量＝それに勝てる遮断器」― 遮断容量＞短絡容量が鉄則',
+    diagram:`<svg viewBox="0 0 450 140" width="450" height="140" style="font-family:sans-serif">
+      <text x="225" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">短絡容量と遮断容量の関係</text>
+      <rect x="10" y="35" width="200" height="95" rx="8" fill="#1c2128" stroke="#f85149" stroke-width="1.5"/>
+      <text x="110" y="57" text-anchor="middle" fill="#f85149" font-size="11" font-weight="bold">短絡容量</text>
+      <text x="110" y="77" text-anchor="middle" fill="#c9d1d9" font-size="10">短絡時に流れ込む</text>
+      <text x="110" y="93" text-anchor="middle" fill="#c9d1d9" font-size="10">電力の大きさ</text>
+      <text x="110" y="112" text-anchor="middle" fill="#8b949e" font-size="10">Ps＝√3・V・Is</text>
+      <text x="110" y="126" text-anchor="middle" fill="#8b949e" font-size="10">＝基準容量/%Z</text>
+      <text x="225" y="85" text-anchor="middle" fill="#e8a838" font-size="14" font-weight="bold">＜</text>
+      <rect x="240" y="35" width="200" height="95" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="340" y="57" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">遮断容量</text>
+      <text x="340" y="77" text-anchor="middle" fill="#c9d1d9" font-size="10">遮断器が安全に</text>
+      <text x="340" y="93" text-anchor="middle" fill="#c9d1d9" font-size="10">遮断できる容量</text>
+      <text x="340" y="112" text-anchor="middle" fill="#8b949e" font-size="10">短絡容量より</text>
+      <text x="340" y="126" text-anchor="middle" fill="#8b949e" font-size="10">大きく選定する</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'短絡容量：短絡事故時にその点に流れ込む電力。Ps＝√3×V×Is、または 基準容量÷%Z で求まる'},
+      {num:'②',text:'%インピーダンス（%Z）が小さいほど短絡電流は大きく、短絡容量も大きくなる'},
+      {num:'③',text:'遮断容量：遮断器が安全に遮断できる容量。必ず短絡容量より大きく選定する'},
+      {num:'④',text:'短絡容量の低減策：高インピーダンス機器の採用、系統分割、限流リアクトルの挿入'},
+    ],
+    keywords:[
+      {word:'短絡容量',core:true},{word:'遮断容量',core:true},{word:'%インピーダンス',core:true},
+      {word:'短絡電流',core:true},
+      {word:'限流リアクトル',sub:true},{word:'系統分割',sub:true},{word:'基準容量',sub:true}
+    ],
+    template:'①短絡容量の定義・計算（%Zとの関係） → ②遮断容量との関係（遮断容量＞短絡容量） → ③短絡容量の低減策',
+    answers:[
+      {label:'標準問題',q:'短絡容量と遮断容量の関係、および短絡容量の低減策を述べよ',
+       a:`（1）短絡容量
+短絡容量とは、系統のある点で三相短絡が生じた際にその点に流れ込む電力の大きさをいう。短絡電流をIs、線間電圧をVとすると、短絡容量Ps＝√3×V×Is で表される。また、基準容量とパーセントインピーダンス%Zを用いて、Ps＝基準容量÷（%Z/100）でも求められる。%Zが小さいほど短絡容量は大きくなる。
+
+（2）遮断容量との関係
+遮断器は短絡事故時の大電流を安全に遮断できなければならない。このため遮断器の定格遮断容量は、設置点の短絡容量より大きく選定する必要がある。
+
+（3）短絡容量の低減策
+系統規模の拡大に伴い短絡容量が増大すると、遮断器の更新が必要になり不経済となる。低減策として以下がある。
+・高インピーダンス変圧器の採用
+・限流リアクトルの直列挿入
+・系統の分割運用（母線分離）
+・上位電圧での系統連系（高電圧化）`
+      }
+    ],
+    flashcards:[
+      {q:'短絡容量を%インピーダンスで表す式は？',a:'短絡容量 ＝ 基準容量 ÷（%Z/100）。%Zが小さいほど短絡容量は大きい'},
+      {q:'遮断容量と短絡容量の大小関係は？',a:'遮断容量 ＞ 短絡容量 でなければならない（遮断器が事故電流を安全に遮断できるように）'},
+      {q:'短絡容量の低減策を3つ挙げよ',a:'①高インピーダンス変圧器の採用\n②限流リアクトルの挿入\n③系統の分割運用（母線分離）'},
+    ]
+  },
+  {
+    id:'t25', freq:'low', cat:'送配電',
+    title:'配電方式と供給信頼度',
+    tags:['送配電','出題あり'],
+    memory:'「樹枝状は安いが弱い、ループ・スポットは高いが強い」― コストと信頼度のトレードオフ',
+    diagram:`<svg viewBox="0 0 460 140" width="460" height="140" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">配電方式と信頼度</text>
+      <rect x="5" y="32" width="145" height="100" rx="8" fill="#1c2128" stroke="#8b949e" stroke-width="1.5"/>
+      <text x="77" y="54" text-anchor="middle" fill="#8b949e" font-size="11" font-weight="bold">樹枝状方式</text>
+      <text x="77" y="74" text-anchor="middle" fill="#c9d1d9" font-size="10">放射状に分岐</text>
+      <text x="77" y="90" text-anchor="middle" fill="#c9d1d9" font-size="10">最も安価・簡単</text>
+      <text x="77" y="108" text-anchor="middle" fill="#f85149" font-size="10">信頼度：低</text>
+      <text x="77" y="124" text-anchor="middle" fill="#8b949e" font-size="10">一般配電向け</text>
+      <rect x="158" y="32" width="145" height="100" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="230" y="54" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">ループ方式</text>
+      <text x="230" y="74" text-anchor="middle" fill="#c9d1d9" font-size="10">環状に接続</text>
+      <text x="230" y="90" text-anchor="middle" fill="#c9d1d9" font-size="10">両側から供給可</text>
+      <text x="230" y="108" text-anchor="middle" fill="#e8a838" font-size="10">信頼度：中〜高</text>
+      <text x="230" y="124" text-anchor="middle" fill="#8b949e" font-size="10">市街地向け</text>
+      <rect x="311" y="32" width="145" height="100" rx="8" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="383" y="54" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="bold">スポット網</text>
+      <text x="383" y="74" text-anchor="middle" fill="#c9d1d9" font-size="10">複数回線で受電</text>
+      <text x="383" y="90" text-anchor="middle" fill="#c9d1d9" font-size="10">ネットワーク</text>
+      <text x="383" y="108" text-anchor="middle" fill="#3fb950" font-size="10">信頼度：最高</text>
+      <text x="383" y="124" text-anchor="middle" fill="#8b949e" font-size="10">大都市・重要負荷</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'樹枝状（放射状）方式：幹線から放射状に分岐。最も安価で簡単だが、事故時に停電範囲が広い'},
+      {num:'②',text:'ループ（環状）方式：環状に接続し両側から供給可能。事故区間を切り離して供給を継続できる'},
+      {num:'③',text:'スポットネットワーク方式：複数の配電線から受電。1回線が停電しても無停電。信頼度が最高'},
+      {num:'④',text:'コストと信頼度はトレードオフ。負荷の重要度に応じて方式を選定する'},
+    ],
+    keywords:[
+      {word:'樹枝状方式',core:true},{word:'ループ方式',core:true},{word:'スポットネットワーク',core:true},
+      {word:'供給信頼度',core:true},
+      {word:'放射状',sub:true},{word:'常用予備',sub:true},{word:'自動切替',sub:true}
+    ],
+    template:'①配電方式の種類を信頼度順に列挙 → ②各方式の構成と特徴 → ③コストと信頼度のトレードオフと選定基準',
+    answers:[
+      {label:'標準問題',q:'配電方式の種類と供給信頼度について述べよ',
+       a:`配電方式は供給信頼度とコストのバランスにより選定される。主な方式を以下に述べる。
+
+（1）樹枝状方式（放射状方式）
+変電所から幹線を引き出し放射状に分岐させる方式。構成が簡単で建設費が安いが、上流で事故が発生すると下流全体が停電する。一般的な配電に広く採用される。
+
+（2）ループ方式（環状方式）
+配電線を環状に接続し、両側から供給できるようにした方式。事故時には事故区間を切り離し、健全区間への供給を継続できる。市街地など信頼度が求められる地域に用いる。
+
+（3）スポットネットワーク方式
+複数の配電線（通常3回線）から受電し、ネットワークプロテクタを介して負荷母線に並列接続する方式。1回線が停電しても無停電で供給を継続でき、信頼度が最も高い。大都市の高層ビルや重要負荷に用いる。
+
+これらはコストと信頼度がトレードオフの関係にあり、負荷の重要度に応じて選定する。`
+      }
+    ],
+    flashcards:[
+      {q:'配電方式を信頼度の低い順に3つ挙げよ',a:'①樹枝状（放射状）方式：安価だが信頼度低\n②ループ（環状）方式：両側供給で中〜高\n③スポットネットワーク方式：複数回線受電で最高'},
+      {q:'スポットネットワーク方式が高信頼度な理由は？',a:'複数回線から受電し、1回線が停電しても残りの回線から無停電で供給を継続できるため'},
+    ]
+  },
+  {
+    id:'t26', freq:'mid', cat:'発変電',
+    title:'同期発電機の短絡比と自己励磁',
+    tags:['発変電','頻出','計算混合'],
+    memory:'「短絡比が大きい＝鈍感な機械（鉄機械）＝安定だが高価・大型」',
+    diagram:`<svg viewBox="0 0 460 140" width="460" height="140" style="font-family:sans-serif">
+      <text x="230" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">短絡比の大小と発電機の特性</text>
+      <rect x="10" y="32" width="210" height="100" rx="8" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="115" y="54" text-anchor="middle" fill="#e8a838" font-size="11" font-weight="bold">短絡比 大（鉄機械）</text>
+      <text x="115" y="74" text-anchor="middle" fill="#c9d1d9" font-size="10">同期リアクタンス：小</text>
+      <text x="115" y="90" text-anchor="middle" fill="#c9d1d9" font-size="10">電圧変動率：小（安定）</text>
+      <text x="115" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">過負荷耐量：大</text>
+      <text x="115" y="124" text-anchor="middle" fill="#f85149" font-size="10">大型・高価・水車発電機向け</text>
+      <rect x="240" y="32" width="210" height="100" rx="8" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="345" y="54" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold">短絡比 小（銅機械）</text>
+      <text x="345" y="74" text-anchor="middle" fill="#c9d1d9" font-size="10">同期リアクタンス：大</text>
+      <text x="345" y="90" text-anchor="middle" fill="#c9d1d9" font-size="10">電圧変動率：大</text>
+      <text x="345" y="106" text-anchor="middle" fill="#c9d1d9" font-size="10">過負荷耐量：小</text>
+      <text x="345" y="124" text-anchor="middle" fill="#3fb950" font-size="10">小型・安価・タービン発電機向け</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'短絡比：無負荷定格電圧を生じる界磁電流と、定格電流に等しい短絡電流を生じる界磁電流の比'},
+      {num:'②',text:'短絡比は同期リアクタンスの逆数にほぼ等しい（短絡比≒1/Xs）'},
+      {num:'③',text:'短絡比大（鉄機械）：電圧変動率小・安定・過負荷に強いが大型高価。水車発電機に多い'},
+      {num:'④',text:'短絡比小（銅機械）：小型安価だが電圧変動が大きい。タービン発電機に多い'},
+    ],
+    keywords:[
+      {word:'短絡比',core:true},{word:'同期リアクタンス',core:true},{word:'電圧変動率',core:true},
+      {word:'鉄機械',core:true},
+      {word:'銅機械',sub:true},{word:'自己励磁',sub:true},{word:'界磁電流',sub:true}
+    ],
+    template:'①短絡比の定義 → ②同期リアクタンスとの関係 → ③短絡比の大小による特性比較（鉄機械・銅機械）',
+    answers:[
+      {label:'標準問題',q:'同期発電機の短絡比の意味と、大小による特性の違いを述べよ',
+       a:`（1）短絡比の定義
+短絡比とは、無負荷で定格電圧を発生させるのに必要な界磁電流を、三相短絡時に定格電流に等しい短絡電流を流すのに必要な界磁電流で除した値である。短絡比は同期リアクタンス（単位法）のほぼ逆数に等しい。
+
+（2）短絡比が大きい発電機（鉄機械）
+同期リアクタンスが小さいため、負荷変動に対する電圧変動率が小さく安定している。過負荷耐量も大きい。一方で鉄心が大きく機械が大型・高価になる。水車発電機に多い。
+
+（3）短絡比が小さい発電機（銅機械）
+同期リアクタンスが大きく、電圧変動率が大きい。過負荷耐量は小さいが、小型・軽量・安価である。タービン発電機（火力・原子力）に多い。
+
+このように短絡比は発電機の安定性・経済性を左右する重要な指標である。`
+      },
+      {label:'自己励磁',q:'同期発電機の自己励磁現象とその防止策を述べよ',
+       a:`（1）自己励磁現象
+同期発電機が無励磁または低励磁の状態で、長距離送電線や進相コンデンサなどの容量性負荷を接続したとき、電機子電流の進み成分が増磁作用を生じて端子電圧が異常に上昇する現象をいう。
+
+（2）発生原理
+容量性負荷による進み電流が界磁を強める方向に作用し、これがさらに電圧を上昇させる正帰還となって電圧が際限なく上昇する。
+
+（3）防止策
+・発電機の短絡比を大きくする（同期リアクタンスを小さくする）。
+・発電機容量を充電容量より十分大きくする（複数台並列運転など）。
+・分路リアクトルを接続して進み無効電力を吸収する。
+・送電線投入時の操作手順を工夫する。`
+      }
+    ],
+    flashcards:[
+      {q:'短絡比と同期リアクタンスの関係は？',a:'短絡比 ≒ 1/同期リアクタンス（単位法）。短絡比が大きいほど同期リアクタンスは小さい'},
+      {q:'短絡比が大きい発電機（鉄機械）の特徴は？',a:'電圧変動率が小さく安定、過負荷に強い。ただし大型・高価。水車発電機に多い'},
+      {q:'同期発電機の自己励磁現象とは？',a:'無励磁・低励磁時に容量性負荷を接続すると、進み電流の増磁作用で端子電圧が異常上昇する現象'},
+    ]
+  },
+  {
+    id:'t27', freq:'low', cat:'施設管理',
+    title:'コージェネレーションと分散型電源',
+    tags:['施設管理','出題あり','省エネ'],
+    memory:'「コージェネ＝電気と熱を一緒に取って総合効率70〜80%」― 排熱を捨てないのが肝',
+    diagram:`<svg viewBox="0 0 450 140" width="450" height="140" style="font-family:sans-serif">
+      <text x="225" y="18" text-anchor="middle" fill="#f0f6fc" font-size="13" font-weight="bold">コージェネレーションの仕組み</text>
+      <rect x="15" y="55" width="90" height="50" rx="6" fill="#1c2128" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="60" y="78" text-anchor="middle" fill="#e8a838" font-size="10" font-weight="bold">原動機</text>
+      <text x="60" y="94" text-anchor="middle" fill="#8b949e" font-size="9">ガスエンジン等</text>
+      <text x="60" y="45" text-anchor="middle" fill="#f85149" font-size="10">燃料投入</text>
+      <path d="M107 70 L150 70" stroke="#3fb950" stroke-width="1.5" marker-end="url(#cg1)"/>
+      <rect x="152" y="50" width="90" height="30" rx="5" fill="#1c2128" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="197" y="70" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="bold">電気（40%）</text>
+      <path d="M107 90 L150 90" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#cg2)"/>
+      <rect x="152" y="85" width="90" height="30" rx="5" fill="#1c2128" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="197" y="105" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="bold">排熱回収（40%）</text>
+      <text x="340" y="65" text-anchor="middle" fill="#f0f6fc" font-size="11" font-weight="bold">総合効率</text>
+      <text x="340" y="88" text-anchor="middle" fill="#3fb950" font-size="16" font-weight="bold">70〜80%</text>
+      <text x="340" y="106" text-anchor="middle" fill="#8b949e" font-size="9">排熱を給湯・冷暖房に利用</text>
+      <defs>
+        <marker id="cg1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#3fb950"/></marker>
+        <marker id="cg2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#58a6ff"/></marker>
+      </defs>
+    </svg>`,
+    flow:[
+      {num:'①',text:'コージェネレーション：発電と同時に排熱を回収し、給湯・冷暖房・蒸気として利用する仕組み'},
+      {num:'②',text:'原動機はガスエンジン・ガスタービン・燃料電池など。電気約40％＋熱約40％を利用'},
+      {num:'③',text:'排熱を捨てないため総合効率は70〜80％に達し、省エネ・CO₂削減に寄与する'},
+      {num:'④',text:'分散型電源として系統負荷を軽減し、非常時のBCP（事業継続）にも貢献する'},
+    ],
+    keywords:[
+      {word:'コージェネレーション',core:true},{word:'排熱回収',core:true},{word:'総合効率',core:true},
+      {word:'分散型電源',core:true},
+      {word:'燃料電池',sub:true},{word:'熱電比',sub:true},{word:'BCP',sub:true}
+    ],
+    template:'①コージェネの定義・仕組み → ②原動機の種類とエネルギー利用率 → ③省エネ効果と分散電源としての意義',
+    answers:[
+      {label:'標準問題',q:'コージェネレーションシステムの仕組みと意義を述べよ',
+       a:`コージェネレーション（熱電併給）は、発電と同時に発生する排熱を回収・利用することで、エネルギーを有効活用するシステムである。
+
+（1）仕組み
+ガスエンジン・ガスタービン・燃料電池などの原動機で発電し、その際に発生する排ガスや冷却水の熱を回収して、給湯・暖房・蒸気・吸収式冷凍機による冷房などに利用する。
+
+（2）エネルギー効率
+通常の火力発電では排熱の大部分が捨てられ熱効率は40％程度にとどまるが、コージェネでは電気約40％に加えて熱約40％を利用するため、総合効率は70〜80％に達する。
+
+（3）意義
+・省エネルギー・CO₂排出削減に寄与する。
+・需要地で発電する分散型電源として送電損失を低減し、系統の負荷を軽減する。
+・停電時にも自立運転できればBCP（事業継続計画）上の非常用電源として機能する。
+
+導入にあたっては、施設の電力需要と熱需要のバランス（熱電比）に適合した機種選定が重要である。`
+      }
+    ],
+    flashcards:[
+      {q:'コージェネレーションの総合効率はなぜ高いのか',a:'発電の排熱を捨てずに給湯・冷暖房等に回収利用するため。電気約40％＋熱約40％で総合効率70〜80％に達する'},
+      {q:'コージェネを分散型電源として見た利点は？',a:'需要地で発電するため送電損失を低減し系統負荷を軽減。自立運転できれば非常時のBCP電源にもなる'},
+    ]
+  },
+  {
+    id:'t28', freq:'mid', cat:'施設管理',
+    title:'受変電設備の構成と保護',
+    tags:['施設管理','頻出','現場直結'],
+    memory:'「受電点→断路器→遮断器→変圧器→低圧」の順に電気が下りる ― 現場の単線結線図そのもの',
+    diagram:`<svg viewBox="0 0 470 130" width="470" height="130" style="font-family:sans-serif">
+      <text x="235" y="16" text-anchor="middle" fill="#f0f6fc" font-size="12" font-weight="bold">受変電設備の構成（電気の流れ）</text>
+      <rect x="5" y="45" width="62" height="45" rx="5" fill="#1c2128" stroke="#f85149" stroke-width="1.3"/>
+      <text x="36" y="64" text-anchor="middle" fill="#f85149" font-size="9" font-weight="bold">受電点</text>
+      <text x="36" y="80" text-anchor="middle" fill="#8b949e" font-size="8">高圧引込</text>
+      <rect x="80" y="45" width="62" height="45" rx="5" fill="#1c2128" stroke="#e8a838" stroke-width="1.3"/>
+      <text x="111" y="62" text-anchor="middle" fill="#e8a838" font-size="9" font-weight="bold">DS/PAS</text>
+      <text x="111" y="78" text-anchor="middle" fill="#8b949e" font-size="8">区分開閉</text>
+      <rect x="155" y="45" width="62" height="45" rx="5" fill="#1c2128" stroke="#58a6ff" stroke-width="1.3"/>
+      <text x="186" y="62" text-anchor="middle" fill="#58a6ff" font-size="9" font-weight="bold">VCB</text>
+      <text x="186" y="78" text-anchor="middle" fill="#8b949e" font-size="8">遮断器</text>
+      <rect x="230" y="45" width="62" height="45" rx="5" fill="#1c2128" stroke="#bc8cff" stroke-width="1.3"/>
+      <text x="261" y="62" text-anchor="middle" fill="#bc8cff" font-size="9" font-weight="bold">CT/VT</text>
+      <text x="261" y="78" text-anchor="middle" fill="#8b949e" font-size="8">計測・保護</text>
+      <rect x="305" y="45" width="62" height="45" rx="5" fill="#1c2128" stroke="#3fb950" stroke-width="1.3"/>
+      <text x="336" y="62" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="bold">変圧器</text>
+      <text x="336" y="78" text-anchor="middle" fill="#8b949e" font-size="8">降圧</text>
+      <rect x="380" y="45" width="85" height="45" rx="5" fill="#1c2128" stroke="#8b949e" stroke-width="1.3"/>
+      <text x="422" y="62" text-anchor="middle" fill="#c9d1d9" font-size="9" font-weight="bold">低圧配電盤</text>
+      <text x="422" y="78" text-anchor="middle" fill="#8b949e" font-size="8">負荷へ</text>
+      <line x1="67" y1="67" x2="80" y2="67" stroke="#58a6ff" stroke-width="1"/>
+      <line x1="142" y1="67" x2="155" y2="67" stroke="#58a6ff" stroke-width="1"/>
+      <line x1="217" y1="67" x2="230" y2="67" stroke="#58a6ff" stroke-width="1"/>
+      <line x1="292" y1="67" x2="305" y2="67" stroke="#58a6ff" stroke-width="1"/>
+      <line x1="367" y1="67" x2="380" y2="67" stroke="#58a6ff" stroke-width="1"/>
+      <text x="235" y="112" text-anchor="middle" fill="#8b949e" font-size="9">PAS＝高圧気中負荷開閉器　VCB＝真空遮断器　キュービクル式が一般的</text>
+    </svg>`,
+    flow:[
+      {num:'①',text:'受電点：電力会社からの高圧引込（6.6kV）。区分開閉器（PAS・UGS）で構内と系統を区分'},
+      {num:'②',text:'遮断器（VCB）：事故電流を遮断。保護継電器（OCR・DGR）からの信号で動作'},
+      {num:'③',text:'計器用変成器（CT・VT）：電流・電圧を計測し保護継電器・計器へ供給'},
+      {num:'④',text:'変圧器で低圧（210V/105V等）に降圧し、低圧配電盤を経て各負荷へ。キュービクル式が一般的'},
+    ],
+    keywords:[
+      {word:'受変電設備',core:true},{word:'PAS（区分開閉器）',core:true},{word:'VCB（真空遮断器）',core:true},
+      {word:'キュービクル',core:true},{word:'保護継電器',core:true},
+      {word:'CT・VT',sub:true},{word:'避雷器',sub:true},{word:'単線結線図',sub:true}
+    ],
+    template:'①受変電設備の役割 → ②構成機器を受電点から順に列挙 → ③保護システムの構成（継電器と遮断器の連携）',
+    answers:[
+      {label:'標準問題',q:'高圧受変電設備の構成機器とその役割を述べよ',
+       a:`高圧受変電設備は、電力会社から受電した高圧電力を施設内で使用する電圧に変換し、安全に配電するための設備である。受電点から順に主要機器を述べる。
+
+（1）区分開閉器（PAS・UGS）
+構内設備と配電系統を区分する開閉器。構内事故の波及を防止する地絡保護機能（SOG制御）を備える。
+
+（2）断路器（DS）
+無負荷時に回路を開放・分離し、点検時の安全を確保する。
+
+（3）遮断器（CB・VCB）
+負荷電流の開閉および事故電流の遮断を行う。真空遮断器（VCB）が広く用いられる。保護継電器からの指令で動作する。
+
+（4）計器用変成器（CT・VT）
+高電圧・大電流を計器・保護継電器が扱える値に変換する。
+
+（5）保護継電器
+過電流継電器（OCR）・地絡方向継電器（DGR）などが異常を検出し遮断器に動作指令を出す。
+
+（6）変圧器
+高圧を低圧（210V・105V等）に降圧する。
+
+これらをまとめて金属箱に収納したキュービクル式が一般に普及している。`
+      }
+    ],
+    flashcards:[
+      {q:'受変電設備で電気が流れる順序を述べよ',a:'受電点 → 区分開閉器（PAS）→ 断路器（DS）→ 遮断器（VCB）→ CT・VT → 変圧器 → 低圧配電盤 → 負荷'},
+      {q:'PAS（区分開閉器）の役割は？',a:'構内設備と配電系統を区分し、構内事故の系統への波及を防止する（地絡保護のSOG制御を備える）'},
+      {q:'キュービクルとは何か',a:'受変電設備の機器一式を金属製の箱に収納したもの。省スペースで安全性が高く、自家用受電設備に広く普及'},
+    ]
+  },
+];
+
+// ══════════════════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════════════════
+const STORAGE_KEY = 'denken2_master_v2';
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      done: state.done,
+      wrong: state.wrong,
+      savedAt: new Date().toISOString()
+    }));
+  } catch(e) { console.warn('保存失敗:', e); }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.done)  Object.assign(state.done,  saved.done);
+    if (saved.wrong) Object.assign(state.wrong, saved.wrong);
+  } catch(e) { console.warn('読込失敗:', e); }
+}
+
+function resetAllState() {
+  if (!confirm('すべての進捗・苦手記録をリセットしますか？')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  state.done  = {};
+  state.wrong = {};
+  renderOverview();
+  updateNavProgress();
+  showToast('リセットしました');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+const state = {
+  done: {},
+  wrong: {},
+  fcQueue: [],
+  fcIndex: 0,
+  fcOk: 0,
+  fcFlipped: false,
+};
+
+// ══════════════════════════════════════════════════════════
+// PAGE NAV
+// ══════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    if (b.textContent.includes(name === 'overview' ? '一覧' : name === 'flashcard' ? 'フラッシュ' : '進捗'))
+      b.classList.add('active');
+  });
+  if (name === 'progress') renderProgress();
+}
+
+// ══════════════════════════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════════════════════════
+function renderOverview() {
+  const grid = document.getElementById('ov-grid');
+  grid.innerHTML = topics.map((t, i) => `
+    <div class="ov-card ${t.freq} ${state.done[t.id] ? 'done-card' : ''}" onclick="showDetail('${t.id}')">
+      <div class="ov-num">${String(i+1).padStart(2,'0')} · ${t.cat}</div>
+      <div class="ov-title">${t.title}</div>
+      <div class="ov-tags">
+        <span class="ov-freq ${t.freq}">${t.freq === 'high' ? '★★★ 超頻出' : t.freq === 'mid' ? '★★ 頻出' : '★ 出題あり'}</span>
+        ${t.tags.slice(1).map(tag => `<span class="ov-tag">${tag}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateNavProgress() {
+  const n = Object.values(state.done).filter(Boolean).length;
+  document.getElementById('navProgress').textContent = `${n}/${topics.length} 完了`;
+}
+
+// ══════════════════════════════════════════════════════════
+// DETAIL
+// ══════════════════════════════════════════════════════════
+function showDetail(id) {
+  const t = topics.find(x => x.id === id);
+  if (!t) return;
+  showPage('detail');
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+
+  const tabsHtml = t.answers.map((a, i) =>
+    `<button class="ans-tab ${i===0?'active':''}" onclick="switchTab(${i}, this)">${a.label}</button>`
+  ).join('');
+  const panelsHtml = t.answers.map((a, i) =>
+    `<div class="ans-panel ${i===0?'active':''}" id="panel_${i}">
+      <div style="padding:12px 16px;font-size:12px;color:var(--text-dim);border-top:none;background:var(--surface);border:1px solid var(--border);border-bottom:none;border-top:none">
+        問: ${a.q}
+      </div>
+      <div class="answer-box">${a.a}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('detail-content').innerHTML = `
+    <button class="back-btn" onclick="showPage('overview');renderOverview()">← 一覧に戻る</button>
+    <div class="detail-header">
+      <div class="detail-badge ${t.freq}">${t.freq==='high'?'★★★ 超頻出':t.freq==='mid'?'★★ 頻出':'★ 出題あり'} · ${t.cat}</div>
+      <div class="detail-title">${t.title}</div>
+      <div class="detail-meta">${t.tags.join(' · ')}</div>
+    </div>
+
+    <div class="section-head">図解でイメージをつかむ</div>
+    <div class="diagram-box">${t.diagram}</div>
+
+    <div class="section-head">記憶術・ワンフレーズ</div>
+    <div class="memory-box"><strong>覚え方</strong>${t.memory}</div>
+
+    <div class="section-head">論点の流れ</div>
+    <div class="flow">${t.flow.map(f=>`
+      <div class="flow-item">
+        <div class="flow-num">${f.num}</div>
+        <div>${f.text}</div>
+      </div>`).join('')}</div>
+
+    <div class="section-head">必須キーワード</div>
+    <div class="kw-grid">
+      ${t.keywords.map(k=>`<span class="kw ${k.core?'core':k.sub?'sub':''}">${k.word}</span>`).join('')}
+    </div>
+
+    <div class="section-head">答案構成テンプレート</div>
+    <div class="template-box">${t.template}</div>
+
+    <div class="section-head">模範答案</div>
+    <div class="answer-wrap">
+      <div class="answer-tabs">${tabsHtml}</div>
+      ${panelsHtml}
+    </div>
+
+    <button class="done-btn ${state.done[t.id]?'done':''}" onclick="toggleDone('${t.id}', this)">
+      ${state.done[t.id]?'✓ 完了済み':'✓ このテーマを完了にする'}
+    </button>
+  `;
+}
+
+function switchTab(idx, btn) {
+  const wrap = btn.closest('.answer-wrap');
+  wrap.querySelectorAll('.ans-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  wrap.querySelectorAll('.ans-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+function toggleDone(id, btn) {
+  state.done[id] = !state.done[id];
+  btn.classList.toggle('done', state.done[id]);
+  btn.textContent = state.done[id] ? '✓ 完了済み' : '✓ このテーマを完了にする';
+  saveState();
+  showToast(state.done[id] ? '✓ 完了として保存しました' : '完了を取り消しました');
+  updateNavProgress();
+  renderOverview();
+}
+
+// ══════════════════════════════════════════════════════════
+// FLASHCARD
+// ══════════════════════════════════════════════════════════
+function buildQueue(filter) {
+  let cards = [];
+  topics.forEach(t => {
+    if (filter === 'high' && t.freq !== 'high') return;
+    if (filter === 'mid' && t.freq !== 'mid') return;
+    if (filter === 'wrong' && !state.wrong[t.id]) return;
+    t.flashcards.forEach(fc => cards.push({...fc, topicTitle: t.title, topicId: t.id}));
+  });
+  return cards;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function startFlash() {
+  const filter = document.getElementById('fc-filter').value;
+  state.fcQueue = shuffle(buildQueue(filter));
+  state.fcIndex = 0;
+  state.fcOk = 0;
+  if (state.fcQueue.length === 0) {
+    alert('該当するカードがありません');
+    return;
+  }
+  document.getElementById('fc-ready').style.display = 'none';
+  document.getElementById('fc-done').style.display = 'none';
+  document.getElementById('fc-session').style.display = 'block';
+  renderCard();
+}
+
+function shuffleFlash() {
+  startFlash();
+}
+
+function renderCard() {
+  const card = state.fcQueue[state.fcIndex];
+  state.fcFlipped = false;
+  document.getElementById('fc-card').classList.remove('flipped');
+  document.getElementById('fc-result').style.display = 'none';
+  document.getElementById('fc-topic').textContent = card.topicTitle;
+  document.getElementById('fc-q').textContent = card.q;
+  document.getElementById('fc-a').textContent = card.a;
+  const pct = (state.fcIndex / state.fcQueue.length * 100).toFixed(0);
+  document.getElementById('fc-prog').style.width = pct + '%';
+  document.getElementById('fc-counter').textContent = `${state.fcIndex + 1} / ${state.fcQueue.length}`;
+}
+
+function flipCard() {
+  if (state.fcFlipped) return;
+  state.fcFlipped = true;
+  document.getElementById('fc-card').classList.add('flipped');
+  setTimeout(() => {
+    document.getElementById('fc-result').style.display = 'flex';
+  }, 300);
+}
+
+function markCard(ok) {
+  if (ok) {
+    state.fcOk++;
+  } else {
+    const card = state.fcQueue[state.fcIndex];
+    state.wrong[card.topicId] = true;
+    saveState();
+  }
+  state.fcIndex++;
+  if (state.fcIndex >= state.fcQueue.length) {
+    showFcDone();
+  } else {
+    renderCard();
+  }
+}
+
+function showFcDone() {
+  document.getElementById('fc-session').style.display = 'none';
+  document.getElementById('fc-done').style.display = 'block';
+  document.getElementById('fc-ok-count').textContent = state.fcOk;
+  document.getElementById('fc-total-count').textContent = state.fcQueue.length;
+}
+
+// ══════════════════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════════════════
+function renderProgress() {
+  const doneCount = Object.values(state.done).filter(Boolean).length;
+  const wrongCount = Object.values(state.wrong).filter(Boolean).length;
+  const totalCards = topics.reduce((s,t) => s + t.flashcards.length, 0);
+
+  document.getElementById('stat-row').innerHTML = `
+    <div class="stat-box"><div class="stat-num">${doneCount}</div><div class="stat-label">完了テーマ数</div></div>
+    <div class="stat-box"><div class="stat-num">${topics.length}</div><div class="stat-label">総テーマ数</div></div>
+    <div class="stat-box"><div class="stat-num">${totalCards}</div><div class="stat-label">総カード枚数</div></div>
+    <div class="stat-box"><div class="stat-num">${wrongCount}</div><div class="stat-label">苦手テーマ数</div></div>
+  `;
+
+  const byFreq = { high:[], mid:[], low:[] };
+  topics.forEach(t => byFreq[t.freq].push(t));
+
+  document.getElementById('prog-grid').innerHTML = topics.map(t => {
+    const pct = state.done[t.id] ? 100 : 0;
+    return `
+      <div class="prog-item">
+        <div class="prog-item-title">${t.title}</div>
+        <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
+        <div class="prog-pct">${state.done[t.id] ? '完了' : '未完了'} ${state.wrong[t.id]?'· 苦手':''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+loadState();
+renderOverview();
+updateNavProgress();
+</script>
+</body>
+</html>
